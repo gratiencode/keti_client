@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonType?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+
+<DialogPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="710.0" prefWidth="767.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="keti_client.ChargementController">
+    <header>
+      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="56.0" prefWidth="715.0">
+         <children>
+            <Pane prefHeight="58.0" prefWidth="767.0">
+               <children>
+                  <ImageView fitHeight="35.0" fitWidth="38.0" layoutX="24.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../icons/container_load32.png" />
+                     </image>
+                  </ImageView>
+                  <Label layoutX="68.0" layoutY="13.0" text="Chargement de marchandise">
+                     <font>
+                        <Font size="21.0" />
+                     </font>
+                  </Label>
+                  <Label layoutX="619.0" layoutY="18.0" prefHeight="16.0" prefWidth="99.0" text="TN : .....">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+            </Pane>
+         </children></AnchorPane>
+    </header>
+    <content>
+      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="587.0" prefWidth="721.0">
+         <children>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="607.0" prefWidth="767.0" style="-fx-background-color: white;">
+               <children>
+                  <Label layoutX="58.0" layoutY="29.0" text="Vehicule :" />
+                  <ComboBox fx:id="vehicules" editable="true" layoutX="310.0" layoutY="29.0" prefHeight="24.0" prefWidth="377.0" />
+                  <Separator layoutX="22.0" layoutY="67.0" prefHeight="0.0" prefWidth="723.0" />
+                  <Label layoutX="58.0" layoutY="83.0" text="Clients :" />
+                  <ComboBox fx:id="clients" editable="true" layoutX="312.0" layoutY="83.0" prefHeight="24.0" prefWidth="375.0" />
+                  <Separator layoutX="22.0" layoutY="119.0" prefHeight="2.0" prefWidth="724.0" />
+                  <Label layoutX="58.0" layoutY="133.0" text="Marchandises : " />
+                  <ListView fx:id="listmarch" layoutX="40.0" layoutY="199.0" prefHeight="323.0" prefWidth="249.0" />
+                  <Button layoutX="304.0" layoutY="358.0" mnemonicParsing="false" prefHeight="24.0" prefWidth="99.0" text="&lt;&lt; Enlever">
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Button>
+                  <Button layoutX="305.0" layoutY="297.0" mnemonicParsing="false" prefHeight="24.0" prefWidth="95.0" text="Ajouter &gt;&gt;">
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Button>
+                  <TextField layoutX="40.0" layoutY="163.0" prefHeight="26.0" prefWidth="250.0" style="-fx-background-radius: 20; -fx-padding: 5;" />
+                  <ImageView fitHeight="14.0" fitWidth="18.0" layoutX="268.0" layoutY="169.0" nodeOrientation="RIGHT_TO_LEFT" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../icons/search32.png" />
+                     </image>
+                  </ImageView>
+                  <TableView fx:id="beforeSave" editable="true" layoutX="418.0" layoutY="202.0" prefHeight="288.0" prefWidth="325.0" tableMenuButtonVisible="true">
+                     <columns>
+                        <TableColumn prefWidth="120.0" text="Designation" />
+                        <TableColumn minWidth="0.0" prefWidth="114.0" text="Quantité" />
+                        <TableColumn prefWidth="78.0" text="A Payer" />
+                     </columns>
+                  </TableView>
+                  <Button layoutX="705.0" layoutY="131.0" mnemonicParsing="false" prefHeight="24.0" prefWidth="0.0" style="-fx-background-color: #66aaee; -fx-background-radius: 20;" text="+" textFill="#eaeef2">
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Button>
+                  <Button layoutX="705.0" layoutY="83.0" mnemonicParsing="false" prefHeight="24.0" prefWidth="0.0" style="-fx-background-color: #66aaee; -fx-background-radius: 20;" text="+" textFill="#eaeef2">
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Button>
+                  <Button fx:id="addVeh" layoutX="702.0" layoutY="29.0" mnemonicParsing="false" onAction="#switchToVehicule" prefHeight="24.0" prefWidth="17.0" style="-fx-background-color: #66aaee; -fx-background-radius: 20;" text="+" textFill="#eaeef2">
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Button>
+                  <Label layoutX="580.0" layoutY="503.0" prefHeight="19.0" prefWidth="161.0" text="Total : ...">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+         </children></AnchorPane>
+    </content>
+    <expandableContent>
+      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="320.0" />
+    </expandableContent>
+   <buttonTypes>
+      <ButtonType fx:constant="OK" />
+      <ButtonType fx:constant="CANCEL" />
+   </buttonTypes>
+</DialogPane>
