@@ -16,7 +16,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import keti_client.keti_UIController;
+import keti_client.KetiGateController;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.event.ChangeListener;
 import org.dizitart.no2.objects.Cursor;
@@ -59,6 +59,14 @@ public class Datastorage<T> {
 
     public T insert(T obj) {
         repository.insert(obj);
+        return obj;
+    }
+
+    public T insertIfNotExist(T obj, String uid) {
+        T t = findById(uid);
+        if (t == null) {
+            repository.insert(obj);
+        }
         return obj;
     }
 

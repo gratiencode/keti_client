@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" fx:id="ppalPane" prefHeight="531.0" prefWidth="1112.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="keti_client.keti_UIController">
+<AnchorPane id="AnchorPane" fx:id="ppalPane" prefHeight="531.0" prefWidth="1112.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="keti_client.KetiGateController">
     <children>
       <StackPane prefHeight="563.0" prefWidth="1112.0" style="-fx-background-color: white;">
          <children>

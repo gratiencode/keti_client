@@ -8,35 +8,33 @@ package keti_client;
 import core.KetiAPI;
 import core.KetiHelper;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
-import java.util.function.Consumer;
 import java.util.prefs.Preferences;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ButtonType;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.Pagination;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import model.Marchandise;
-import model.Tiers;
+import model.Succursale;
 import model.Transporter;
-import model.Vehicule;
+import model.Voyage;
 import org.dizitart.no2.Nitrite;
 import util.Datastorage;
 import util.ScreensChangeListener;
+import util.Token;
+import util.TransporterView;
 import views.MainUI;
 
 /**
@@ -49,83 +47,74 @@ public class ChargementController implements Initializable, ScreensChangeListene
     private String token;
     KetiAPI keti;
     Preferences pref;
+    private static ChargementController instance;
 
     Datastorage<Transporter> transdb;
-    Datastorage<Tiers> cltdb;
-    Datastorage<Vehicule> vehidb;
-    Datastorage<Marchandise> marchdb;
+    Datastorage<Voyage> voyagedb;
+    Datastorage<Marchandise> msedb;
 
     @FXML
-    TreeTableView<Transporter> tranporters;
-    @FXML
     ComboBox<Integer> rowPP;
-    @FXML
-    ComboBox<String> vehicules_names;
-    @FXML
-    ComboBox<String> clients_names;
-    @FXML
-    ComboBox<String> goods_names;
     @FXML
     Pagination pagination;
     @FXML
     Label total_global;
     @FXML
-    Label tracking;
-    @FXML
-    Label sous_total;
-    @FXML
     DatePicker dpk_debut;
     @FXML
     DatePicker dpk_fin;
+
     @FXML
-    TextField search_goods;
+    TreeTableView<TransporterView> tbl_tranporterViews;
     @FXML
-    ListView<Marchandise> list_marchandise;
+    TreeTableColumn<TransporterView, String> tricoldate;
     @FXML
-    TableView<Transporter> transpanier;
+    TreeTableColumn<TransporterView, String> tricolplaque;
     @FXML
-    TableColumn<Transporter, String> colgoods_name;
+    TreeTableColumn<TransporterView, String> tricolmodel;
     @FXML
-    TableColumn<Transporter, String> colgoods_quant;
+    TreeTableColumn<TransporterView, String> tricolnom;
     @FXML
-    TableColumn<Transporter, String> colgoods_prices;
+    TreeTableColumn<TransporterView, String> tricolprenom;
     @FXML
-    TreeTableColumn<Transporter, String> tricoldate;
+    TreeTableColumn<TransporterView, String> tricolmarch;
     @FXML
-    TreeTableColumn<Transporter, String> tricolplaque;
+    TreeTableColumn<TransporterView, String> tricolquant;
     @FXML
-    TreeTableColumn<Transporter, String> tricolmodel;
+    TreeTableColumn<TransporterView, String> tricoldette;
     @FXML
-    TreeTableColumn<Transporter, String> tricolnom;
+    TreeTableColumn<TransporterView, String> tricolpaye;
     @FXML
-    TreeTableColumn<Transporter, String> tricolprenom;
+    TreeTableColumn<TransporterView, String> tricolrestant;
     @FXML
-    TreeTableColumn<Transporter, String> tricolmarch;
+    TreeTableColumn<TransporterView, String> tricoltracking;
     @FXML
-    TreeTableColumn<Transporter, String> tricolquant;
-    @FXML
-    TreeTableColumn<Transporter, String> tricoldette;
-    @FXML
-    TreeTableColumn<Transporter, String> tricolpaye;
-    @FXML
-    TreeTableColumn<Transporter, String> tricolrestant;
-    @FXML
-    TreeTableColumn<Transporter, String> tricoltracking;
+    TreeTableColumn<TransporterView, String> tricoletat;
 
     private Nitrite localDatabase;
+    private Succursale currentSuccursale;
 
-    @FXML
-    TableView<Transporter> afterSave;
-    Dialog dlg;
-    @FXML
+    ObservableList<TransporterView> tableContent;
+
     Label count;
 
     Pane main;
 
+    @FXML
+    private Button addVeh;
+
+    public ChargementController() {
+        instance=this;
+    }
+    public static ChargementController getInstance(){
+        return instance;
+    }
+    
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         pref = Preferences.userNodeForPackage(this.getClass());
-        dlg = new Dialog();
+        tableContent = FXCollections.observableArrayList();
 
     }
 
@@ -134,76 +123,24 @@ public class ChargementController implements Initializable, ScreensChangeListene
         this.controler = cont;
     }
 
-    @FXML
-    public void switchToClients(ActionEvent evt) {
-        MainController.getInstance().gotoClients();
-    }
-
-    @FXML
-    public void switchToVehicule(ActionEvent evt) {
-        MainController.getInstance().gotoVehicule();
-        dlg.close();
-    }
-
-    @FXML
     public void viewTransUI(ActionEvent evt) {
-        DialogPane dp = MainUI.element("transporter.fxml");
-        dlg.setDialogPane(dp);
-        dlg.showAndWait().ifPresent(new Consumer() {
-            @Override
-            public void accept(Object t) {
-                ButtonType bt = (ButtonType) t;
-                if (bt.equals(ButtonType.OK)) {
-                    System.out.println("BTn OK");
-                } else {
-                    System.err.println("Btn cancel");
-                }
+        MainUI.floatDialog("transporter.fxml", 770, 730, token, localDatabase, currentSuccursale);
+    }
 
-            }
+    public void saveTransaction(List<TransporterView> translist) {
+        System.out.println("Insertrans size "+translist.size());
+        translist.forEach((TransporterView tr) -> {
+            TransporterView t=new TransporterView();
+            Transporter insertrans = transdb.insert(tr.getTransporter());
+            System.out.println("trans "+insertrans.getUid());
+            Voyage insertvoyage = voyagedb.insert(tr.getVoyage()); 
         });
     }
 
-    @FXML
-    public void addMarchandise(ActionEvent evt) {
-
-    }
-
-    @FXML
-    public void chooseMarchandise(ActionEvent evt) {
-
-    }
-
-    @FXML
-    public void removeMarchandise(ActionEvent evt) {
-
-    }
-
-    @FXML
-    public void saveTransport(ActionEvent evt) {
-
-    }
-
-    @FXML
-    public void cancel(ActionEvent evt) {
-
-    }
-
-    @FXML
-    public void searchGoods(ActionEvent evt) {
-
-    }
-
-    @FXML
-    public void refresh(ActionEvent evt) {
-
-    }
-
-    @FXML
     public void updateTransporter(ActionEvent evt) {
 
     }
 
-    @FXML
     public void deleteTransporter(ActionEvent evt) {
 
     }
@@ -211,14 +148,17 @@ public class ChargementController implements Initializable, ScreensChangeListene
     public void setToken(String token) {
         this.token = token;
         keti = KetiHelper.createService(this.token);
+        KetiHelper.setOnTokenRefreshCallback((Token var1) -> {
+            this.token = var1.getToken();
+            pref.put("KetiToken", token);
+        });
     }
 
     public void setLocalDatabase(Nitrite localDatabase) {
         this.localDatabase = localDatabase;
         transdb = new Datastorage<>(this.localDatabase, Transporter.class);
-        vehidb=new Datastorage<>(this.localDatabase,Vehicule.class);
-        cltdb=new Datastorage<>(this.localDatabase,Tiers.class);
-        marchdb=new Datastorage<>(this.localDatabase,Marchandise.class);
+        voyagedb = new Datastorage<>(this.localDatabase, Voyage.class);
+        msedb = new Datastorage<>(this.localDatabase, Marchandise.class);
     }
 
     @FXML
@@ -231,6 +171,10 @@ public class ChargementController implements Initializable, ScreensChangeListene
     private void onOutHome(MouseEvent event) {
         ImageView img = (ImageView) event.getSource();
         MainUI.removeShaddowEffect(img);
+    }
+
+    public void setCurrentSuccursale(Succursale currentSuccursale) {
+        this.currentSuccursale = currentSuccursale;
     }
 
 }

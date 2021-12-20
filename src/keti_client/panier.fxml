@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" prefHeight="297.0" prefWidth="533.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="keti_client.PanierController">
+   <children>
+      <Pane layoutX="-1.0" layoutY="1.0" prefHeight="70.0" prefWidth="532.0">
+         <children>
+            <ImageView fitHeight="46.0" fitWidth="57.0" layoutX="22.0" layoutY="15.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../icons/boxes32.png" />
+               </image>
+            </ImageView>
+            <Label fx:id="choosen_goods" layoutX="86.0" layoutY="15.0" prefHeight="39.0" prefWidth="385.0" text="Marchanise choisie">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Label>
+            <Separator layoutY="67.0" prefHeight="5.0" prefWidth="532.0" />
+         </children>
+      </Pane>
+      <Pane layoutX="-1.0" layoutY="227.0" prefHeight="70.0" prefWidth="533.0">
+         <children>
+            <Label fx:id="total_sum" layoutX="23.0" layoutY="14.0" prefHeight="24.0" prefWidth="263.0" text="Total : " textFill="#615d5d">
+               <font>
+                  <Font name="Arial Black" size="16.0" />
+               </font>
+            </Label>
+            <Button layoutX="320.0" layoutY="11.0" mnemonicParsing="false" onAction="#close" prefHeight="46.0" prefWidth="87.0" style="-fx-background-color: #aeaeae;" text="Fermer" textFill="#ebe5e5" />
+            <Button layoutX="418.0" layoutY="11.0" mnemonicParsing="false" onAction="#confirmChoice" prefHeight="46.0" prefWidth="87.0" style="-fx-background-color: #66aaee;" text="Confirmer" textFill="WHITE" />
+            <Separator layoutX="-1.0" layoutY="-1.0" prefHeight="5.0" prefWidth="533.0" />
+         </children>
+      </Pane>
+      <TextField fx:id="prix_unit" layoutX="76.0" layoutY="158.0" onAction="#confirmChoice" onKeyPressed="#write" prefHeight="24.0" prefWidth="385.0" promptText="Prix unitaire" />
+      <TextField fx:id="quantite" layoutX="76.0" layoutY="106.0" onAction="#confirmChoice" onKeyPressed="#write" prefHeight="24.0" prefWidth="385.0" promptText="Quantité" />
+   </children>
+</AnchorPane>

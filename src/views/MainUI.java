@@ -21,6 +21,7 @@ import javafx.scene.Scene;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
@@ -28,13 +29,21 @@ import keti_client.ChargementController;
 import keti_client.ClientController;
 import keti_client.Keti_client;
 import keti_client.MainController;
+import keti_client.MarchandiseController;
+import keti_client.PanierController;
 import keti_client.SuccursalController;
+import keti_client.TransporterController;
 import keti_client.UIController;
 import keti_client.VehiculeController;
-import keti_client.keti_UIController;
+import keti_client.KetiGateController;
+import model.Marchandise;
+import model.Succursale;
+import model.Tiers;
+import model.Vehicule;
 import org.controlsfx.control.Notifications;
 import org.dizitart.no2.Nitrite;
 import util.Constants;
+import util.LoginResult;
 
 /**
  *
@@ -46,7 +55,7 @@ public class MainUI {
     private static double yOffset = 0;
     public static Stage mainStage;
 
-    public static void replaceView(Class theClass, String fxmlPath, int h, int w, String user, String token) {
+    public static void replaceView(Class theClass, String fxmlPath, int h, int w, String user, String token,LoginResult loginr) {
         try {
 
             FXMLLoader fxmlLoader = new FXMLLoader(theClass.getResource(fxmlPath));
@@ -54,6 +63,7 @@ public class MainUI {
             MainController controller = fxmlLoader.<MainController>getController();
             controller.setUsername(user);
             controller.setToken(token);
+            controller.setLonginResult(loginr);
             mainStage = new Stage();
             Scene scene = new Scene(main);
             mainStage.initStyle(StageStyle.UNDECORATED);
@@ -89,7 +99,8 @@ public class MainUI {
             node.setEffect(null);
         }
     }
-     public static <T> T element(String ress) {
+
+    public static <T> T element(String ress) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(MainController.class.getResource(ress));
             return fxmlLoader.load();
@@ -97,10 +108,64 @@ public class MainUI {
             Logger.getLogger(MainUI.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
-     }
-     
-     public static Initializable getLoadedController(Initializable init, String ress){
-         FXMLLoader fxmlLoader = new FXMLLoader(init.getClass().getResource(ress));
+    }
+
+    public static void floatDialog(String res, int w, int h,String token,Nitrite db,Object... objs) {
+        FXMLLoader fxmlLoader = new FXMLLoader(MainController.class.getResource(res));
+        try {
+            Parent load = fxmlLoader.load();
+             switch (res) {
+                case Constants.TRANSPORTER_DLG:
+                    Succursale suk=(Succursale) objs[0];
+                    TransporterController controller = fxmlLoader.<TransporterController>getController();
+                    controller.setToken(token);
+                    controller.setLocalDatabase(db);
+                    controller.setCurrentSuccursale(suk);                 
+                    break;
+                case Constants.MARCHANDISE_DLG:
+                    MarchandiseController mcontroller = fxmlLoader.<MarchandiseController>getController();
+                    mcontroller.setLocalDatabase(db);
+                    break;
+                case Constants.ADDTOCART_DLG:
+                    Tiers trs=(Tiers) objs[0];
+                    Marchandise m=(Marchandise)objs[1];
+                    Vehicule veh=(Vehicule) objs[2];
+                    Integer track=(Integer) objs[3];
+                    Succursale s=(Succursale) objs[4];
+                    PanierController pcontroller = fxmlLoader.<PanierController>getController();
+                    pcontroller.setMarchandise(m);
+                    pcontroller.setTiers(trs);
+                    pcontroller.setVehicule(veh);
+                    pcontroller.setTracking(track);
+                    pcontroller.setSuccursale(s); 
+                    break;
+                case Constants.VEHICULE_VIEW:
+                    
+                    break;
+
+            }
+            Scene scene = new Scene(load, w, h);
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initStyle(StageStyle.UNDECORATED);
+            stage.setScene(scene);
+            load.setOnMousePressed((javafx.scene.input.MouseEvent event) -> {
+                xOffset = event.getSceneX();
+                yOffset = event.getSceneY();
+            });
+
+            load.setOnMouseDragged((javafx.scene.input.MouseEvent event) -> {
+                stage.setX(event.getScreenX() - xOffset);
+                stage.setY(event.getScreenY() - yOffset);
+            });
+            stage.showAndWait();
+        } catch (IOException ex) {
+            Logger.getLogger(MainUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public static Initializable getLoadedController(Initializable init, String ress) {
+        FXMLLoader fxmlLoader = new FXMLLoader(init.getClass().getResource(ress));
         try {
             fxmlLoader.load();
             return fxmlLoader.getController();
@@ -108,9 +173,9 @@ public class MainUI {
             Logger.getLogger(MainUI.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
-     }
+    }
 
-    public static Pane getPage(Initializable init, String ress, String token, Nitrite db) {
+    public static Pane getPage(Initializable init, String ress, String token, Nitrite db,Object... objs) {
         try {
 
             FXMLLoader fxmlLoader = new FXMLLoader(init.getClass().getResource(ress));
@@ -120,23 +185,26 @@ public class MainUI {
                     SuccursalController controller = fxmlLoader.<SuccursalController>getController();
                     controller.setToken(token);
                     controller.setLocalDatabase(db);
-                    
+
                     break;
                 case Constants.CHARGEMENT_VIEW:
+                    Succursale sc=(Succursale) objs[0];
                     ChargementController ccontr = fxmlLoader.<ChargementController>getController();
                     ccontr.setToken(token);
                     ccontr.setLocalDatabase(db);
+                    ccontr.setCurrentSuccursale(sc);
                     break;
                 case Constants.CLIENT_VIEW:
-                    ClientController cclt=fxmlLoader.<ClientController>getController();
-                     cclt.setToken(token);
-                     cclt.setLocalDatabase(db);break;
+                    ClientController cclt = fxmlLoader.<ClientController>getController();
+                    cclt.setToken(token);
+                    cclt.setLocalDatabase(db);
+                    break;
                 case Constants.VEHICULE_VIEW:
-                    VehiculeController vctrl=fxmlLoader.<VehiculeController>getController();
+                    VehiculeController vctrl = fxmlLoader.<VehiculeController>getController();
                     vctrl.setToken(token);
                     vctrl.setDatabase(db);
                     break;
-                                       
+
             }
 
             return main;
@@ -147,6 +215,7 @@ public class MainUI {
     }
 
     public static void notify(Node graph, String title, String message, double duration) {
+        graph.setVisible(true);
         Notifications.create()
                 .title(title)
                 .graphic(graph)
@@ -154,6 +223,7 @@ public class MainUI {
                 .position(Pos.TOP_RIGHT)
                 .hideAfter(Duration.seconds(duration))
                 .show();
+        graph.setVisible(false);
     }
 
     public static Nitrite initDatabase() {
@@ -178,7 +248,7 @@ public class MainUI {
                     try {
                         file.createNewFile();
                     } catch (IOException ex) {
-                        Logger.getLogger(keti_UIController.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(KetiGateController.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             }

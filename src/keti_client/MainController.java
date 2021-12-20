@@ -34,7 +34,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import org.dizitart.no2.Nitrite;
 import util.Constants;
+import util.LoginResult;
 import util.ScreensChangeListener;
+import util.SyncEngine;
 
 import util.Token;
 import views.MainUI;
@@ -48,6 +50,7 @@ public class MainController implements Initializable, ScreensChangeListener {
     UIController controler;
     String token;
     String username;
+    private LoginResult longinResult;
 
     Nitrite db;
 
@@ -63,7 +66,7 @@ public class MainController implements Initializable, ScreensChangeListener {
     private ImageView succursale;
 
     @FXML
-    private ImageView home, chargement, cclient, cvehicule, caisse, depense, dechargement, retrait,performance;
+    private ImageView home, chargement, cclient, cvehicule, caisse, depense, dechargement, retrait, performance;
     @FXML
     private Label pane_title;
     @FXML
@@ -76,6 +79,8 @@ public class MainController implements Initializable, ScreensChangeListener {
     KetiAPI KETI;
     Preferences pref;
 
+    SyncEngine engine;
+
     private static MainController instance;
 
     public MainController() {
@@ -85,6 +90,7 @@ public class MainController implements Initializable, ScreensChangeListener {
     public static MainController getInstance() {
         return instance;
     }
+    
 
     @FXML
     private void exit(MouseEvent event) {
@@ -108,19 +114,11 @@ public class MainController implements Initializable, ScreensChangeListener {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
-        KETI = KetiHelper.createService(token);
-        KetiHelper.setOnTokenRefreshCallback((Token var1) -> {
-            token = var1.getToken();
-            pref.put("KetiToken", token);
-        });
         installTooltips();
         initDb();
-//        search();
-        System.out.println("Initializing");
+        System.out.println("Initializing...");
         // MainController.mainPane = mainpane;
-        // MainController.connexion = connected_user_;
-        //  initSuccursaleTable();
+
     }
 
     @Override
@@ -148,7 +146,7 @@ public class MainController implements Initializable, ScreensChangeListener {
                     try {
                         file.createNewFile();
                     } catch (IOException ex) {
-                        Logger.getLogger(keti_UIController.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(KetiGateController.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             }
@@ -163,7 +161,7 @@ public class MainController implements Initializable, ScreensChangeListener {
 
     private void installTooltips() {
         Tooltip thome = new Tooltip();
-        thome.setText("Accueil");
+        thome.setText("Tableau de bord");
         thome.setStyle("-fx-font: normal bold 14 Langdon; "
                 + "-fx-base: #EEEEEE; "
                 + "-fx-text-fill: white;");
@@ -218,7 +216,7 @@ public class MainController implements Initializable, ScreensChangeListener {
                 + "-fx-base: #EEEEEE; "
                 + "-fx-text-fill: white;");
         Tooltip.install(succursale, succ);
-         Tooltip perf = new Tooltip();
+        Tooltip perf = new Tooltip();
         perf.setText("Performances");
         perf.setStyle("-fx-font: normal bold 14 Langdon; "
                 + "-fx-base: #EEEEEE; "
@@ -230,9 +228,17 @@ public class MainController implements Initializable, ScreensChangeListener {
         return token;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setToken(final String tken) {
+        this.token = tken;
+        System.out.println("Token " + tken);
         KETI = KetiHelper.createService(token);
+        KetiHelper.setOnTokenRefreshCallback((Token var1) -> {
+            this.token = var1.getToken();
+            pref.put("KetiToken", token);
+        });
+        SyncEngine se = new SyncEngine(KETI, db);
+        se.syncDown();
+        se.syncUp();
     }
 
     public String getUsername() {
@@ -246,6 +252,7 @@ public class MainController implements Initializable, ScreensChangeListener {
 
     @FXML
     public void switchToSuccursalle(MouseEvent evt) {
+
         Pane p = MainUI.getPage(this, "agencies.fxml", token, db);
         mainpane.getChildren().remove(0);
         mainpane.getChildren().add(p);
@@ -273,9 +280,9 @@ public class MainController implements Initializable, ScreensChangeListener {
     }
 
     public void gotoVehicule() {
-        Pane p = MainUI.getPage(this,Constants.VEHICULE_VIEW, token, db);
+        Pane p = MainUI.getPage(this, Constants.VEHICULE_VIEW, token, db);
         System.out.println("elt " + mainpane);
-        ObservableList<Node> nodes = getMainpane().getChildren();
+        ObservableList<Node> nodes = mainpane.getChildren();
         nodes.remove(0);
         mainpane.getChildren().add(p);
         pane_title.setText("Vehicules");
@@ -302,7 +309,7 @@ public class MainController implements Initializable, ScreensChangeListener {
     }
 
     public void gotoChargements() {
-        Pane p = MainUI.getPage(this, "chargement.fxml", token, db);
+        Pane p = MainUI.getPage(this, "chargement.fxml", token, db,longinResult.getSuccursale());
         mainpane.getChildren().remove(0);
         mainpane.getChildren().add(p);
         pane_title.setText("Chargement");
@@ -375,42 +382,46 @@ public class MainController implements Initializable, ScreensChangeListener {
                     } else {
                         VehiculeController.getInstance().filter(searchField.getText());
                     }
-                }else if (CURRENT_VIEW.equals(Constants.CLIENTS)) {
+                } else if (CURRENT_VIEW.equals(Constants.CLIENTS)) {
+                    System.out.println("Current view " + CURRENT_VIEW);
+                    if (searchField.getText().isEmpty()) {
+                        try {
+                            ClientController.getInstance().refresh();
+                        } catch (IOException ex) {
+                            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    } else {
+                        ClientController.getInstance().filter(searchField.getText());
+                    }
+                } else if (CURRENT_VIEW.equals(Constants.CHARGEMENT)) {
                     System.out.println("Current view " + CURRENT_VIEW);
                     if (searchField.getText().isEmpty()) {
                         VehiculeController.getInstance().refresh();
                     } else {
                         VehiculeController.getInstance().filter(searchField.getText());
                     }
-                }else if (CURRENT_VIEW.equals(Constants.CHARGEMENT)) {
+                } else if (CURRENT_VIEW.equals(Constants.DECHARGEMENT)) {
                     System.out.println("Current view " + CURRENT_VIEW);
                     if (searchField.getText().isEmpty()) {
                         VehiculeController.getInstance().refresh();
                     } else {
                         VehiculeController.getInstance().filter(searchField.getText());
                     }
-                }else if (CURRENT_VIEW.equals(Constants.DECHARGEMENT)) {
+                } else if (CURRENT_VIEW.equals(Constants.DEPENSE)) {
                     System.out.println("Current view " + CURRENT_VIEW);
                     if (searchField.getText().isEmpty()) {
                         VehiculeController.getInstance().refresh();
                     } else {
                         VehiculeController.getInstance().filter(searchField.getText());
                     }
-                }else if (CURRENT_VIEW.equals(Constants.DEPENSE)) {
+                } else if (CURRENT_VIEW.equals(Constants.CAISSES)) {
                     System.out.println("Current view " + CURRENT_VIEW);
                     if (searchField.getText().isEmpty()) {
                         VehiculeController.getInstance().refresh();
                     } else {
                         VehiculeController.getInstance().filter(searchField.getText());
                     }
-                }else if (CURRENT_VIEW.equals(Constants.CAISSES)) {
-                    System.out.println("Current view " + CURRENT_VIEW);
-                    if (searchField.getText().isEmpty()) {
-                        VehiculeController.getInstance().refresh();
-                    } else {
-                        VehiculeController.getInstance().filter(searchField.getText());
-                    }
-                }else if (CURRENT_VIEW.equals(Constants.RETRAIT)) {
+                } else if (CURRENT_VIEW.equals(Constants.RETRAIT)) {
                     System.out.println("Current view " + CURRENT_VIEW);
                     if (searchField.getText().isEmpty()) {
                         VehiculeController.getInstance().refresh();
@@ -426,6 +437,10 @@ public class MainController implements Initializable, ScreensChangeListener {
     @FXML
     public void search(KeyEvent evt) {
         search();
+    }
+
+    public void setLonginResult(LoginResult longinResult) {
+        this.longinResult = longinResult;
     }
 
 }

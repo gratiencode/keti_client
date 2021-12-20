@@ -33,7 +33,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import model.Succursale;
 import model.Vehicule;
 import org.dizitart.no2.Nitrite;
 import retrofit2.Call;
@@ -42,6 +41,7 @@ import retrofit2.Response;
 import util.DataId;
 import util.Datastorage;
 import util.ScreensChangeListener;
+import util.Token;
 import views.MainUI;
 
 /**
@@ -164,6 +164,10 @@ public class VehiculeController implements Initializable, ScreensChangeListener 
     public void setToken(String token) {
         this.token = token;
         keti = KetiHelper.createService(token);
+        KetiHelper.setOnTokenRefreshCallback((Token var1) -> {
+            this.token = var1.getToken();
+            pref.put("KetiToken", token);
+        });
         syncDown();
     }
 
@@ -175,7 +179,6 @@ public class VehiculeController implements Initializable, ScreensChangeListener 
     }
 
     public void refresh() {
-
         vehicules = vehiculesdb.findAll();
         tblVeh.getItems().clear();
         for (Vehicule v : vehicules) {
@@ -189,7 +192,7 @@ public class VehiculeController implements Initializable, ScreensChangeListener 
         });
     }
 
-    private void syncDown() {
+    public void syncDown() {
         keti.getVehicules().enqueue(new Callback<List<Vehicule>>() {
             @Override
             public void onResponse(Call<List<Vehicule>> call, Response<List<Vehicule>> rspns) {
@@ -199,10 +202,7 @@ public class VehiculeController implements Initializable, ScreensChangeListener 
                         if(vehiculesdb==null){
                             return;
                         }
-                        Vehicule vv = vehiculesdb.findById(v.getUid());
-                        if (vv == null) {
-                            vehiculesdb.insert(v);
-                        }
+                        vehiculesdb.insertIfNotExist(v, v.getUid()); 
                     }
                 }
             }

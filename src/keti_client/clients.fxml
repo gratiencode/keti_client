@@ -61,7 +61,7 @@
                   <Button layoutX="478.0" layoutY="511.0" mnemonicParsing="false" onAction="#createTiers" prefHeight="40.0" prefWidth="130.0" style="-fx-background-color: #66aaee;" text="Enregistrer" textFill="#fcfcfc" />
                   <Pane layoutX="1289.0" layoutY="29.0" prefHeight="49.0" prefWidth="49.0" style="-fx-border-color: #66aaee; -fx-background-radius: 12; -fx-background-color: #ffffff;">
                      <children>
-                        <ImageView fitHeight="31.0" fitWidth="29.0" layoutX="13.0" layoutY="9.0" nodeOrientation="INHERIT" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="31.0" fitWidth="29.0" layoutX="13.0" layoutY="9.0" nodeOrientation="INHERIT" onMouseClicked="#delete" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../icons/delete32.png" />
                            </image>
@@ -91,7 +91,7 @@
                   </Pane>
                   <Pane layoutX="1149.0" layoutY="30.0" prefHeight="49.0" prefWidth="49.0" style="-fx-border-color: #66aaee; -fx-background-radius: 12; -fx-background-color: #ffffff;">
                      <children>
-                        <ImageView fitHeight="31.0" fitWidth="29.0" layoutX="11.0" layoutY="12.0" nodeOrientation="INHERIT" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="31.0" fitWidth="29.0" layoutX="11.0" layoutY="12.0" nodeOrientation="INHERIT" onMouseClicked="#refresh" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../icons/refresh32.png" />
                            </image>

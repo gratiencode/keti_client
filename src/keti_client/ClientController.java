@@ -7,12 +7,15 @@ package keti_client;
 
 import core.KetiAPI;
 import core.KetiHelper;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -35,7 +38,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import model.Contacts;
 import model.Tiers;
-import model.Vehicule;
+import okhttp3.ResponseBody;
 import org.dizitart.no2.Nitrite;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -44,6 +47,7 @@ import util.DataId;
 import util.Datastorage;
 import util.ScreensChangeListener;
 import util.TierView;
+import util.Token;
 import views.MainUI;
 
 /**
@@ -61,7 +65,7 @@ public class ClientController implements Initializable, ScreensChangeListener {
 
     Datastorage<Tiers> cltdb;
     Datastorage<Contacts> contactdb;
-    List<TierView> tiersTab=new ArrayList<>();
+    List<TierView> tiersTab = new ArrayList<>();
 
     @FXML
     Label count;
@@ -155,12 +159,21 @@ public class ClientController implements Initializable, ScreensChangeListener {
     public void setToken(String token) {
         this.token = token;
         keti = KetiHelper.createService(token);
+        KetiHelper.setOnTokenRefreshCallback((Token var1) -> {
+            this.token = var1.getToken();
+            pref.put("KetiToken", token);
+        });
     }
 
     public void setLocalDatabase(Nitrite localDatabase) {
         this.localDatabase = localDatabase;
         this.cltdb = new Datastorage<>(this.localDatabase, Tiers.class);
         this.contactdb = new Datastorage<>(this.localDatabase, Contacts.class);
+        try {
+            refresh();
+        } catch (IOException ex) {
+            Logger.getLogger(ClientController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @FXML
@@ -179,8 +192,8 @@ public class ClientController implements Initializable, ScreensChangeListener {
         tier.setTypetiers(type);
         Tiers t = cltdb.insert(tier);
         String tvc = "";
-        List<Contacts> listC=new ArrayList<>();
-        
+        List<Contacts> listC = new ArrayList<>();
+
         if (!phone1.getText().isEmpty()) {
             Contacts c1 = new Contacts(DataId.generate());
             c1.setIdTiers(t);
@@ -214,28 +227,22 @@ public class ClientController implements Initializable, ScreensChangeListener {
             tvu.setContacts(c);
             tvu.setTiers(t);
             tblTiers.getItems().add(tvu);
-            MainUI.notify(notify, "Succès", "Tier créé avec succès", 3);
-           // tier.setContactsList(listC);
-            keti.createTier(tier).enqueue(new Callback<Tiers>() {
-                @Override
-                public void onResponse(Call<Tiers> call, Response<Tiers> rspns) {
-                 System.out.println("response "+rspns.message());
-                    if(rspns.isSuccessful()){
-                        System.out.println("Created succesfuly");
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Tiers> call, Throwable thrwbl) {
-                 System.err.println("Erreur "+thrwbl.getMessage());
-                }
-            });
+            MainUI.notify(notify, "Succès", "Tiers créé avec succès", 3);
+            Call<Tiers> createTier = keti.createTier(tier);
+            Call<List<Contacts>> createContacts = keti.createContacts(listC);
+            try {
+                createTier.execute();
+                createContacts.execute();
+            } catch (IOException ex) {
+                Logger.getLogger(ClientController.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
         }
 
     }
-    
-    @FXML public void modifyClient(MouseEvent evt){
+
+    @FXML
+    public void modifyClient(MouseEvent evt) {
         String type = type_tiers.getSelectionModel().getSelectedItem();
         if ((type.isEmpty() || nom_Clt.getText().isEmpty()
                 || prenom_clt.getText().isEmpty()
@@ -243,7 +250,7 @@ public class ClientController implements Initializable, ScreensChangeListener {
                 || phone2.getText().isEmpty() || phone3.getText().isEmpty())) {
             return;
         }
-        TierView tv=tblTiers.getSelectionModel().getSelectedItem();
+        TierView tv = tblTiers.getSelectionModel().getSelectedItem();
         if (tv == null) {
             return;
         }
@@ -253,14 +260,14 @@ public class ClientController implements Initializable, ScreensChangeListener {
         tier.setPrenom(prenom_clt.getText());
         tier.setTypetiers(type);
         String tvc = "";
-        
+
         Tiers uv = cltdb.update("uid", tier.getUid(), tier);
-        List<Contacts> listC=new ArrayList<>();
-         if (!phone1.getText().isEmpty()) {
+        List<Contacts> listC = new ArrayList<>();
+        if (!phone1.getText().isEmpty()) {
             Contacts c1 = contactdb.findAllEquals("phone", tv.getContacts().getPhone().split(",")[0]).get(0);
             c1.setIdTiers(uv);
             c1.setPhone(phone1.getText());
-            Contacts c = contactdb.update("phone", tv.getContacts().getPhone().split(",")[0],c1);
+            Contacts c = contactdb.update("phone", tv.getContacts().getPhone().split(",")[0], c1);
             listC.add(c);
             tvc += phone1.getText() + ",";
         }
@@ -268,7 +275,7 @@ public class ClientController implements Initializable, ScreensChangeListener {
             Contacts c2 = contactdb.findAllEquals("phone", tv.getContacts().getPhone().split(",")[1]).get(0);
             c2.setIdTiers(uv);
             c2.setPhone(phone2.getText());
-            Contacts c = contactdb.update("phone", tv.getContacts().getPhone().split(",")[1],c2);
+            Contacts c = contactdb.update("phone", tv.getContacts().getPhone().split(",")[1], c2);
             listC.add(c);
             tvc += phone2.getText() + ",";
         }
@@ -276,13 +283,13 @@ public class ClientController implements Initializable, ScreensChangeListener {
             Contacts c3 = contactdb.findAllEquals("phone", tv.getContacts().getPhone().split(",")[2]).get(0);
             c3.setIdTiers(uv);
             c3.setPhone(phone3.getText());
-            Contacts c = contactdb.update("phone", tv.getContacts().getPhone().split(",")[2],c3);
+            Contacts c = contactdb.update("phone", tv.getContacts().getPhone().split(",")[2], c3);
             listC.add(c);
             tvc += phone3.getText() + ",";
         }
         if (uv != null) {
             MainUI.notify(notify, "Succès", "Tiers modifié avec succès", 3);
-           // refresh();
+            // refresh();
             //here come API update
             keti.updateTier(uv.getUid(), uv).enqueue(new Callback<Tiers>() {
                 @Override
@@ -297,27 +304,77 @@ public class ClientController implements Initializable, ScreensChangeListener {
                     System.err.println("Ereur ");
                 }
             });
-            
+
             keti.updateContacts(listC).enqueue(new Callback<List<Contacts>>() {
                 @Override
                 public void onResponse(Call<List<Contacts>> call, Response<List<Contacts>> rspns) {
-                    if(rspns.isSuccessful()){
+                    if (rspns.isSuccessful()) {
                         System.out.println("Update succesfully");
                     }
                 }
 
                 @Override
                 public void onFailure(Call<List<Contacts>> call, Throwable thrwbl) {
-                    System.err.println("Erreur update Contact"+thrwbl.getMessage());
-                 }
+                    System.err.println("Erreur update Contact" + thrwbl.getMessage());
+                }
             });
 
         }
 
     }
     
-    private void refresh(){
-        
+    @FXML public void refresh(MouseEvent evt){
+        try {
+            refresh();
+             
+        } catch (IOException ex) {
+            Logger.getLogger(ClientController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    @FXML public void delete(MouseEvent evt){
+        String tuid=tblTiers.getSelectionModel().getSelectedItem().getTiers().getUid();
+        cltdb.delete("uid", tuid);
+        List<Contacts> lc=contactdb.findAllEquals("idTiers", tuid);
+        try {
+            Response<Tiers> exec = keti.deleteTier(tuid).execute();
+            ResponseBody body = keti.deleteContacts(lc).execute().body();
+            contactdb.delete("id_tiers", tuid);
+        } catch (IOException ex) {
+            Logger.getLogger(ClientController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void refresh() throws IOException {
+        tblTiers.getItems().clear();
+        Call<List<Tiers>> tiers = keti.getTiers();
+        Response<List<Tiers>> execute = tiers.execute();
+        List<Tiers> lst=execute.body();
+        for(Tiers t:lst){
+            cltdb.insertIfNotExist(t,t.getUid());
+            Call<List<Contacts>> contakt = keti.findContacts(t.getUid());
+            Response<List<Contacts>> lcont = contakt.execute();
+            List<Contacts> body = lcont.body();
+            for(Contacts c:body){
+                contactdb.insertIfNotExist(c,c.getUid());
+            }
+        }
+        List<Tiers> lt=cltdb.findAll();
+        for(Tiers t:lt){
+            List<Contacts> cts = contactdb.findAllEquals("id_tiers", t.getUid());
+             String ct="";
+            for(Contacts c:cts){
+                 ct+=c.getPhone()+",";
+            }
+            Contacts c=new Contacts();
+            c.setPhone(ct);
+            TierView tv=new TierView();
+            tv.setTiers(t);
+            tv.setContacts(c);
+            tiersTab.add(tv);
+            tblTiers.getItems().addAll(tiersTab); 
+        }
+        count.setText(tblTiers.getItems().size()+" Tiers");
     }
 
     @FXML
@@ -335,16 +392,20 @@ public class ClientController implements Initializable, ScreensChangeListener {
     @FXML
     public void pick(MouseEvent evt) {
         TierView v = tblTiers.getSelectionModel().getSelectedItem();
+        if (v == null) {
+            return;
+        }
         nom_Clt.setText(v.getTiers().getNom());
         prenom_clt.setText(v.getTiers().getPrenom());
         adresse.setText(v.getTiers().getAdresse());
-        phone1.setText(v.getContacts().getPhone().split(",")[0]);
-        phone2.setText(v.getContacts().getPhone().split(",")[1]);
-        phone3.setText(v.getContacts().getPhone().split(",")[2]);
+        String ph[] = v.getContacts().getPhone().split(",");
+        phone1.setText(ph.length > 0 ? ph[0] : "");
+        phone2.setText(ph.length > 1 ? ph[1] : "");
+        phone3.setText(ph.length > 2 ? ph[2] : "");
         type_tiers.getSelectionModel().select(v.getTiers().getTypetiers());
     }
 
-     @FXML
+    @FXML
     public void removeVehicule(MouseEvent evt) {
 
         ObservableList<TierView> selectedItems = tblTiers.getSelectionModel().getSelectedItems();
@@ -386,6 +447,7 @@ public class ClientController implements Initializable, ScreensChangeListener {
         }
 
     }
+
     public void filter(String query) {
         List<TierView> result = new ArrayList<>();
         for (TierView s : tiersTab) {

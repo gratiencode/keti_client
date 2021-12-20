@@ -5,10 +5,7 @@
  */
 package keti_client;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
@@ -16,7 +13,6 @@ import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableView;
-import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Window;
 import model.Marchandise;

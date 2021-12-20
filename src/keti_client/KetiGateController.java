@@ -40,11 +40,10 @@ import views.MainUI;
  *
  * @author eroot
  */
-public class keti_UIController implements Initializable,ScreensChangeListener {
+public class KetiGateController implements Initializable, ScreensChangeListener {
 
-    
     UIController controler;
-    
+
     @FXML
     private Button btn_connect;
 
@@ -52,8 +51,6 @@ public class keti_UIController implements Initializable,ScreensChangeListener {
     private TextField username_field;
     @FXML
     private PasswordField pswd_field;
-
-   
 
     String token;
     ObjectRepository<Succursale> noSqlSucc;
@@ -76,20 +73,22 @@ public class keti_UIController implements Initializable,ScreensChangeListener {
 
     @FXML
     private TableView<Succursale> tbl_succs;
-    @FXML TableColumn<Succursale,String> nomSuccursale;
-    @FXML TableColumn<Succursale,String> adresse;
-    @FXML TableColumn<Succursale,String> directeur;
+    @FXML
+    TableColumn<Succursale, String> nomSuccursale;
+    @FXML
+    TableColumn<Succursale, String> adresse;
+    @FXML
+    TableColumn<Succursale, String> directeur;
 
     //end succursalle
     @FXML
     AnchorPane ppalPane;
-    
 
     Stage pStage;
     KetiAPI keti;
     Preferences pref;
 
-    public keti_UIController() {
+    public KetiGateController() {
         keti = KetiHelper.createService(null);
         pref = Preferences.userNodeForPackage(this.getClass());
     }
@@ -116,15 +115,10 @@ public class keti_UIController implements Initializable,ScreensChangeListener {
                     pref.put("KetiToken", token);
                     controler.setScreen(Constants.MAIN);
                     pref.put("uname", cred.getUsername());
-                    pref.put("pswd", cred.getPassword());
-                    
-                 
-                       // tbl_succs.setItems(osuc); 
-                        Platform.runLater(() -> {
-                               MainUI.replaceView(this.getClass(), "mainui.fxml", 790, 1550,cred.getUsername(),token);
-                               Keti_client.stagex.close();
-                         // initSuccursaleTable();
-//                   
+                    pref.put("pswd", cred.getPassword()); 
+                    Platform.runLater(() -> {
+                        MainUI.replaceView(this.getClass(), "mainui.fxml", 790, 1550, cred.getUsername(), token, lr);
+                        Keti_client.stagex.close();
                     });
 
                 }
@@ -155,22 +149,14 @@ public class keti_UIController implements Initializable,ScreensChangeListener {
         MainUI.removeShaddowEffect(img);
     }
 
-   
-
-
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-       
-      
-    }
-    
-   
 
-    
+    }
 
     @Override
     public void onScreenChange(UIController cont) {
-      this.controler=cont; 
+        this.controler = cont;
     }
 
 }

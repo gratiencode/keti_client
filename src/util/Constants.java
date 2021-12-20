@@ -35,4 +35,14 @@ public class Constants {
     public static final String CAISSES = "caisse-ui";
     public static final SimpleDateFormat DateFormateur=new SimpleDateFormat("yyyy-MM-dd");
     public static final Calendar Calendrier=Calendar.getInstance();
+    
+    //dialogs
+    public static final String TRANSPORTER_DLG = "transporter.fxml";
+    public static final String MARCHANDISE_DLG = "marchandise.fxml";
+    public static final String ADDTOCART_DLG = "panier.fxml";
+    //constants
+    public static final String VEHICLE_LOADED="Chargé";
+    public static final String VEHICLE_DEPARTURE="Départ";
+    public static final String VEHICLE_ARRIVAL="Arrivée";
+    
 }
