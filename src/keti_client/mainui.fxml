@@ -6,7 +6,9 @@
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SplitMenuButton?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.image.Image?>
@@ -25,7 +27,7 @@
                   <Pane fx:id="topane" layoutX="60.0" prefHeight="68.0" prefWidth="1487.0" style="-fx-background-color: white;">
                      <children>
                         <TextField fx:id="searchField" layoutX="37.0" layoutY="21.0" onKeyTyped="#search" prefHeight="29.0" prefWidth="618.0" promptText="Rechercher" style="-fx-background-radius: 50;" />
-                        <ImageView fitHeight="35.0" fitWidth="29.0" layoutX="1441.0" layoutY="21.0" onMouseClicked="#exit" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="35.0" fitWidth="29.0" layoutX="1441.0" layoutY="18.0" onMouseClicked="#exit" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../icons/Cancel_32px.png" />
                            </image>
@@ -33,7 +35,7 @@
                               <Cursor fx:constant="HAND" />
                            </cursor>
                         </ImageView>
-                        <ImageView fitHeight="40.0" fitWidth="40.0" layoutX="1331.0" layoutY="13.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="40.0" fitWidth="40.0" layoutX="1261.0" layoutY="13.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../icons/Male%20User_100px.png" />
                            </image>
@@ -48,12 +50,17 @@
                               <Font size="26.0" />
                            </font>
                         </Label>
-                        <ImageView fitHeight="16.0" fitWidth="20.0" layoutX="1361.0" layoutY="40.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="16.0" fitWidth="20.0" layoutX="1287.0" layoutY="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../icons/Connection%20Status%20On_32px.png" />
                            </image>
                         </ImageView>
-                        <Label fx:id="connected_user_" layoutX="1376.0" layoutY="27.0" prefHeight="16.0" prefWidth="62.0" text="User" />
+                        <SplitMenuButton fx:id="user_connected" layoutX="1308.0" layoutY="20.0" mnemonicParsing="false" prefHeight="24.0" prefWidth="129.0" style="-fx-background-color: white;" text="User">
+                          <items>
+                            <MenuItem mnemonicParsing="false" text="Action 1" />
+                            <MenuItem mnemonicParsing="false" text="Action 2" />
+                          </items>
+                        </SplitMenuButton>
                      </children>
                   </Pane>
                   <Pane prefHeight="798.0" prefWidth="62.0" style="-fx-background-color: white;">
@@ -103,15 +110,7 @@
                               <Cursor fx:constant="HAND" />
                            </cursor>
                         </ImageView>
-                        <ImageView fx:id="dechargement" fitHeight="40.0" fitWidth="40.0" layoutX="12.0" layoutY="541.0" onMouseClicked="#switchToDechargement" onMouseDragExited="#onOutHome" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../icons/container_unload32.png" />
-                           </image>
-                           <cursor>
-                              <Cursor fx:constant="HAND" />
-                           </cursor>
-                        </ImageView>
-                        <ImageView fx:id="retrait" fitHeight="40.0" fitWidth="40.0" layoutX="12.0" layoutY="616.0" onMouseClicked="#switchToRetrait" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="retrait" fitHeight="40.0" fitWidth="40.0" layoutX="12.0" layoutY="544.0" onMouseClicked="#switchToRetrait" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../icons/check-out32.png" />
                            </image>
@@ -135,7 +134,7 @@
                               <Cursor fx:constant="HAND" />
                            </cursor>
                         </ImageView>
-                        <ImageView fx:id="performance" fitHeight="40.0" fitWidth="40.0" layoutX="12.0" layoutY="687.0" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="performance" fitHeight="40.0" fitWidth="40.0" layoutX="12.0" layoutY="615.0" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../icons/speedometer.png" />
                            </image>
@@ -153,14 +152,14 @@
                   </Label>
                   <AnchorPane fx:id="mainpane" layoutX="81.0" layoutY="138.0">
                      <children>
-                        <Pane fx:id="showPane" prefHeight="635.0" prefWidth="1445.0">
+                        <Pane fx:id="showPane" onMouseEntered="#switchToDashBoard" prefHeight="635.0" prefWidth="1445.0">
                            <children>
-                              <Pane layoutX="39.0" layoutY="21.0" prefHeight="351.0" prefWidth="982.0" style="-fx-background-color: white; -fx-background-radius: 10;">
+                              <Pane layoutX="39.0" layoutY="21.0" onMouseEntered="#switchToDashBoard" prefHeight="411.0" prefWidth="982.0" style="-fx-background-color: white; -fx-background-radius: 10;">
                                  <effect>
                                     <DropShadow />
                                  </effect>
                                  <children>
-                                    <AreaChart horizontalGridLinesVisible="false" layoutX="10.0" layoutY="10.0" legendSide="RIGHT" legendVisible="false" prefHeight="332.0" prefWidth="963.0" style="-fx-background-color: white; -fx-background-radius: 5;" title="Ventes">
+                                    <AreaChart fx:id="venteChart" horizontalGridLinesVisible="false" layoutX="10.0" layoutY="10.0" legendSide="RIGHT" legendVisible="false" onMouseEntered="#switchToDashBoard" onMouseMoved="#switchToDashBoard" prefHeight="390.0" prefWidth="963.0" style="-fx-background-color: white; -fx-background-radius: 5;" title="Ventes">
                                       <xAxis>
                                         <CategoryAxis side="BOTTOM" />
                                       </xAxis>
@@ -170,7 +169,7 @@
                                     </AreaChart>
                                  </children>
                               </Pane>
-                              <Pane layoutX="39.0" layoutY="402.0" prefHeight="136.0" prefWidth="299.0" style="-fx-background-color: white; -fx-background-radius: 10;">
+                              <Pane layoutX="39.0" layoutY="457.0" onMouseMoved="#switchToDashBoard" prefHeight="136.0" prefWidth="299.0" style="-fx-background-color: white; -fx-background-radius: 10;">
                                  <effect>
                                     <DropShadow />
                                  </effect>
@@ -180,7 +179,7 @@
                                           <Image url="@../icons/database32.png" />
                                        </image>
                                     </ImageView>
-                                    <Label layoutX="22.0" layoutY="16.0" prefHeight="49.0" prefWidth="230.0" text="234">
+                                    <Label fx:id="nClt" layoutX="22.0" layoutY="16.0" prefHeight="49.0" prefWidth="230.0" text="234">
                                        <font>
                                           <Font size="40.0" />
                                        </font>
@@ -188,7 +187,7 @@
                                     <Label layoutX="37.0" layoutY="75.0" text="Nombre de clients" />
                                  </children>
                               </Pane>
-                              <Pane layoutX="366.0" layoutY="402.0" prefHeight="136.0" prefWidth="299.0" style="-fx-background-color: white; -fx-background-radius: 10;">
+                              <Pane layoutX="366.0" layoutY="457.0" onMouseMoved="#switchToDashBoard" prefHeight="136.0" prefWidth="299.0" style="-fx-background-color: white; -fx-background-radius: 10;">
                                  <effect>
                                     <DropShadow />
                                  </effect>
@@ -198,28 +197,23 @@
                                           <Image url="@../icons/delivery_truck32.png" />
                                        </image>
                                     </ImageView>
-                                    <Label layoutX="15.0" layoutY="21.0" prefHeight="49.0" prefWidth="230.0" text="9874">
+                                    <Label fx:id="nCharg" layoutX="15.0" layoutY="21.0" prefHeight="49.0" prefWidth="230.0" text="9874">
                                        <font>
                                           <Font size="40.0" />
                                        </font>
                                     </Label>
-                                    <Label layoutX="30.0" layoutY="80.0" text="Nombre de chargements" />
+                                    <Label layoutX="30.0" layoutY="80.0" text="Nombre de colis chargés" />
                                  </children>
                               </Pane>
-                              <Pane layoutX="1039.0" layoutY="21.0" prefHeight="351.0" prefWidth="376.0" style="-fx-background-color: white; -fx-background-radius: 10;">
+                              <Pane layoutX="1039.0" layoutY="21.0" prefHeight="411.0" prefWidth="376.0" style="-fx-background-color: white; -fx-background-radius: 10;">
                                  <effect>
                                     <DropShadow />
                                  </effect>
                                  <children>
-                                    <PieChart layoutX="10.0" layoutY="74.0" prefHeight="245.0" prefWidth="356.0" />
-                                    <Label layoutX="28.0" layoutY="26.0" text="Clients fréquants">
-                                       <font>
-                                          <Font size="25.0" />
-                                       </font>
-                                    </Label>
+                                    <PieChart fx:id="piepane" layoutX="10.0" layoutY="10.0" legendVisible="false" onMouseMoved="#switchToDashBoard" prefHeight="384.0" prefWidth="356.0" title="Clients fréquants" />
                                  </children>
                               </Pane>
-                              <Pane layoutX="695.0" layoutY="403.0" prefHeight="136.0" prefWidth="325.0" style="-fx-background-color: white; -fx-background-radius: 10;">
+                              <Pane layoutX="695.0" layoutY="458.0" onMouseMoved="#switchToDashBoard" prefHeight="136.0" prefWidth="325.0" style="-fx-background-color: white; -fx-background-radius: 10;">
                                  <effect>
                                     <DropShadow />
                                  </effect>
@@ -229,7 +223,7 @@
                                           <Image url="@../icons/expenses32.png" />
                                        </image>
                                     </ImageView>
-                                    <Label layoutX="12.0" layoutY="15.0" prefHeight="49.0" prefWidth="252.0" text="780$">
+                                    <Label fx:id="nDepense" layoutX="12.0" layoutY="15.0" prefHeight="49.0" prefWidth="252.0" text="780$">
                                        <font>
                                           <Font size="40.0" />
                                        </font>
@@ -237,7 +231,7 @@
                                     <Label layoutX="24.0" layoutY="74.0" text="Dépense" />
                                  </children>
                               </Pane>
-                              <Pane layoutX="1084.0" layoutY="405.0" prefHeight="136.0" prefWidth="325.0" style="-fx-background-color: white; -fx-background-radius: 10;">
+                              <Pane layoutX="1084.0" layoutY="460.0" onMouseMoved="#switchToDashBoard" prefHeight="136.0" prefWidth="325.0" style="-fx-background-color: white; -fx-background-radius: 10;">
                                  <effect>
                                     <DropShadow />
                                  </effect>
@@ -247,7 +241,7 @@
                                           <Image url="@../icons/check-out32.png" />
                                        </image>
                                     </ImageView>
-                                    <Label layoutX="21.0" layoutY="12.0" prefHeight="49.0" prefWidth="230.0" text="9874">
+                                    <Label fx:id="aretirer" layoutX="21.0" layoutY="12.0" prefHeight="49.0" prefWidth="230.0" text="9874">
                                        <font>
                                           <Font size="40.0" />
                                        </font>

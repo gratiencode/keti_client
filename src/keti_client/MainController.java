@@ -5,35 +5,55 @@
  */
 package keti_client;
 
+import com.sun.glass.ui.MenuItem;
 import com.sun.javafx.PlatformUtil;
 import core.KetiAPI;
 import core.KetiHelper;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Side;
 import javafx.scene.Node;
+import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.PieChart;
+import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Label;
+import javafx.scene.control.SplitMenuButton;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.InputMethodEvent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import model.Comptefin;
+import model.Depense;
+import model.Payer;
+import model.Tiers;
+import model.Transporter;
+import model.Vehicule;
 import org.dizitart.no2.Nitrite;
 import util.Constants;
+import util.Datastorage;
 import util.LoginResult;
 import util.ScreensChangeListener;
 import util.SyncEngine;
@@ -64,17 +84,33 @@ public class MainController implements Initializable, ScreensChangeListener {
 
     @FXML
     private ImageView succursale;
-
+    @FXML
+    Label aretirer;
+    @FXML
+    Label nClt;
+    @FXML
+    Label nDepense;
+    @FXML
+    Label nCharg;
     @FXML
     private ImageView home, chargement, cclient, cvehicule, caisse, depense, dechargement, retrait, performance;
     @FXML
     private Label pane_title;
+//    @FXML
+//    private Label connected_user_;
     @FXML
-    private Label connected_user_;
+    private AreaChart<?, ?> venteChart;
+    Datastorage<Transporter> transdb;
+    Datastorage<Tiers> tiers;
+    Datastorage<Payer> dpenses;
 
     Pane topane;
     @FXML
     Pane showPane;
+    @FXML
+    PieChart piepane;
+    @FXML
+    SplitMenuButton user_connected;
 
     KetiAPI KETI;
     Preferences pref;
@@ -90,7 +126,6 @@ public class MainController implements Initializable, ScreensChangeListener {
     public static MainController getInstance() {
         return instance;
     }
-    
 
     @FXML
     private void exit(MouseEvent event) {
@@ -98,6 +133,17 @@ public class MainController implements Initializable, ScreensChangeListener {
         db.commit();
         db.close();
         System.exit(0);
+    }
+
+    private List<Tiers> pickTiers(List<Transporter> tc) {
+        List<Tiers> result = new ArrayList<>();
+        tc.forEach(tr -> {
+            Tiers t = tr.getIdTiers();
+            if (!result.contains(t)) {
+                result.add(t);
+            }
+        });
+        return result;
     }
 
     @FXML
@@ -133,15 +179,18 @@ public class MainController implements Initializable, ScreensChangeListener {
                     .compressed()
                     .openOrCreate("admin", "Admin*22");
         } else {
+            //" + System.getProperty("user.name") + "
             File folder = new File("/home/" + System.getProperty("user.name") + "/Keti/datastore");
             File file = null;
-            boolean dir = false;
+            boolean dir = folder.exists();
 
-            if (!folder.exists()) {
+            if (!dir) {
                 dir = folder.mkdir();
             }
+            System.out.println("Droit Folder " + dir);
             if (dir) {
                 file = new File("/home/" + System.getProperty("user.name") + "/Keti/datastore/nitrikdb.db");
+                // System.out.println("Droit "+file.canWrite());
                 if (!file.exists()) {
                     try {
                         file.createNewFile();
@@ -152,10 +201,10 @@ public class MainController implements Initializable, ScreensChangeListener {
             }
             db = Nitrite.builder()
                     .filePath(file)
-                    .compressed()
-                    .autoCommitBufferSize(16)
-                    .openOrCreate("admin", "Admin*22");
+                    .openOrCreate();
         }
+        transdb = new Datastorage<>(db, Transporter.class);
+        tiers = new Datastorage<>(db, Tiers.class);
 
     }
 
@@ -185,7 +234,7 @@ public class MainController implements Initializable, ScreensChangeListener {
                 + "-fx-text-fill: white;");
         Tooltip.install(chargement, tchargement);
         Tooltip tdepense = new Tooltip();
-        tdepense.setText("Dépenses");
+        tdepense.setText("Ecritures");
         tdepense.setStyle("-fx-font: normal bold 14 Langdon; "
                 + "-fx-base: #EEEEEE; "
                 + "-fx-text-fill: white;");
@@ -237,8 +286,18 @@ public class MainController implements Initializable, ScreensChangeListener {
             pref.put("KetiToken", token);
         });
         SyncEngine se = new SyncEngine(KETI, db);
-        se.syncDown();
-        se.syncUp();
+        se.start();
+        loadSaleChart();
+        loadClientChart();
+        dpenses = new Datastorage(db, Payer.class);
+        double dep = figureOutExpense(dpenses.findAll());
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                nDepense.setText(dep + "$");
+            }
+        });
+
     }
 
     public String getUsername() {
@@ -247,7 +306,158 @@ public class MainController implements Initializable, ScreensChangeListener {
 
     public void setUsername(String username) {
         this.username = username;
-        connected_user_.setText(username);
+        user_connected.setText(username);
+        //user_connected.getItems().clear();
+        // connected_user_.setText(username);
+    }
+
+    public double figureOutExpense(List<Payer> payer) {
+        double sommeDep = 0;
+        LocalDate ld = LocalDate.now();
+        int year = ld.getYear();
+        int month = ld.getMonthValue();
+        for (Payer p : payer) {
+            Depense d = p.getDepenseId();
+            if (d != null) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(p.getDatePayement());
+                int pyear = cal.get(Calendar.YEAR);
+                int pmonth = cal.get(Calendar.MONTH) + 1;
+                if (pyear==year && month==pmonth) {
+                    sommeDep += p.getMontantPaye();
+                }
+            }
+        }
+        return sommeDep;
+    }
+
+    private void loadSaleChart() {
+        List<Tiers> trss = new Datastorage<>(db, Tiers.class).findAll();
+        List<Transporter> ltr = transdb.findAll();
+        List<Vehicule> lv = extractvehicules(ltr);
+        for (Vehicule v : lv) {
+            HashMap<String, Double> sume = sum(ltr, v.getPlaque());
+            XYChart.Series ch = new XYChart.Series<>();
+            ch.setName(v.getPlaque());
+            for (Map.Entry<String, Double> mm : sume.entrySet()) {
+                ch.getData().addAll(new XYChart.Data<>(Constants.getMonthName(mm.getKey()), mm.getValue()));
+            }
+            venteChart.setLegendVisible(true);
+            venteChart.setLegendSide(Side.BOTTOM);
+            if (!exist((ObservableList<Series<?, ?>>) venteChart.getData(), ch.getName())) {
+                venteChart.getData().add(ch);
+            }
+
+        }
+        nCharg.setText(String.valueOf(ltr.size()));
+        aretirer.setText(String.valueOf(getNonRetiree(ltr)));
+        nClt.setText(String.valueOf(trss.size()));
+    }
+
+    private boolean exist(ObservableList<Series<?, ?>> ls, String name) {
+        for (Series s : ls) {
+            if (s.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private long getNonRetiree(List<Transporter> ltr) {
+        long i = 0;
+        for (Transporter t : ltr) {
+            if (t.getObservation().equalsIgnoreCase("A retirer")) {
+                i++;
+            }
+        }
+        return i;
+    }
+
+    private void loadClientChart() {
+        List<Transporter> ltr = transdb.findAll();
+        List<Tiers> lv = pickTiers(ltr);
+        System.out.println("clts " + lv.size());
+//        piepane.setPrefSize(356, 323);
+        piepane.setLabelsVisible(true);
+        piepane.setLegendVisible(false);
+
+        for (Tiers v : lv) {
+            long sume = clientCount(ltr, v);
+            PieChart.Data data = new PieChart.Data(v.getNom().charAt(0) + ". " + v.getPrenom(), sume);
+            if (!existPie(piepane.getData(), data.getName())) {
+                piepane.getData().add(data);
+            }
+        }
+
+        dpenses = new Datastorage(db, Payer.class);
+        double dep = figureOutExpense(dpenses.findAll());
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                nDepense.setText(dep + "$");
+            }
+        });
+
+    }
+
+    public boolean existPie(ObservableList<PieChart.Data> data, String name) {
+        for (PieChart.Data d : data) {
+            if (d.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public long clientCount(List<Transporter> ltr, Tiers t) {
+        long count = 0;
+        for (Transporter tr : ltr) {
+            Tiers trs = tr.getIdTiers();
+            if (trs.getUid().equals(t.getUid())) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public List<String> getMonths(List<Transporter> ltr) {
+        List<String> result = new ArrayList<>();
+        for (Transporter t : ltr) {
+            String date = Constants.DateFormateur.format(t.getDateTransport());
+            String ann = date.split("-")[0];
+            String moi = date.split("-")[1];
+            result.add(ann + "-" + moi);
+        }
+        return result;
+    }
+
+    HashMap<String, Double> sum(List<Transporter> ltr, String plak) {
+        HashMap<String, Double> result = new HashMap<>();
+        List<String> mon = getMonths(ltr);
+        mon.forEach((s) -> {
+            double som = 0;
+            for (Transporter t : ltr) {
+                Vehicule v = t.getIdVehicule();
+                String mois = Constants.DateFormateur.format(t.getDateTransport());
+                if (v.getPlaque().equals(plak) && mois.contains(s)) {
+                    som += t.getPriceToPay();
+                }
+            }
+            //  System.out.println("v = " + plak + " som " + som);
+            result.put(s, som);
+        });
+        return result;
+    }
+
+    List<Vehicule> extractvehicules(List<Transporter> ltr) {
+        List<Vehicule> rst = new ArrayList<>();
+        for (Transporter t : ltr) {
+            Vehicule v = t.getIdVehicule();
+            if (!rst.contains(v)) {
+                rst.add(v);
+            }
+        }
+        return rst;
     }
 
     @FXML
@@ -298,8 +508,10 @@ public class MainController implements Initializable, ScreensChangeListener {
         try {
             pane = FXMLLoader.load(getClass().getResource(res));
             setNode(pane);
+
         } catch (IOException ex) {
-            Logger.getLogger(MainUI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MainUI.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -309,7 +521,7 @@ public class MainController implements Initializable, ScreensChangeListener {
     }
 
     public void gotoChargements() {
-        Pane p = MainUI.getPage(this, "chargement.fxml", token, db,longinResult.getSuccursale());
+        Pane p = MainUI.getPage(this, "chargement.fxml", token, db, longinResult.getSuccursale());
         mainpane.getChildren().remove(0);
         mainpane.getChildren().add(p);
         pane_title.setText("Chargement");
@@ -321,16 +533,21 @@ public class MainController implements Initializable, ScreensChangeListener {
         mainpane.getChildren().remove(0);
         mainpane.getChildren().add(showPane);
         pane_title.setText("Tableau de bord");
-
+        loadSaleChart();
+        loadClientChart();
     }
 
     @FXML
     public void switchToDepense(MouseEvent evt) {
-        Pane p = MainUI.getPage(this, "depenses.fxml", token, db);
+        gotoecriture(null);
+    }
+
+    public void gotoecriture(Comptefin cpt) {
+        Pane p = MainUI.getPage(this, "depenses.fxml", token, db, cpt);
         mainpane.getChildren().remove(0);
         mainpane.getChildren().add(p);
-        pane_title.setText("Dépenses");
-
+        pane_title.setText("Ecritures");
+        CURRENT_VIEW = Constants.DEPENSE;
     }
 
     @FXML
@@ -344,11 +561,11 @@ public class MainController implements Initializable, ScreensChangeListener {
 
     @FXML
     public void switchToCaisse(MouseEvent evt) {
-        Pane p = MainUI.getPage(this, "caisse.fxml", token, db);
+        Pane p = MainUI.getPage(this, "finance.fxml", token, db, longinResult.getSuccursale());
         mainpane.getChildren().remove(0);
         mainpane.getChildren().add(p);
         pane_title.setText("Finance");
-
+        CURRENT_VIEW = Constants.CAISSES;
     }
 
     @FXML
@@ -357,6 +574,7 @@ public class MainController implements Initializable, ScreensChangeListener {
         mainpane.getChildren().remove(0);
         mainpane.getChildren().add(p);
         pane_title.setText("Retrait de marchandise");
+        CURRENT_VIEW = Constants.RETRAIT;
 
     }
 
@@ -387,8 +605,10 @@ public class MainController implements Initializable, ScreensChangeListener {
                     if (searchField.getText().isEmpty()) {
                         try {
                             ClientController.getInstance().refresh();
+
                         } catch (IOException ex) {
-                            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(MainController.class
+                                    .getName()).log(Level.SEVERE, null, ex);
                         }
                     } else {
                         ClientController.getInstance().filter(searchField.getText());
@@ -396,9 +616,9 @@ public class MainController implements Initializable, ScreensChangeListener {
                 } else if (CURRENT_VIEW.equals(Constants.CHARGEMENT)) {
                     System.out.println("Current view " + CURRENT_VIEW);
                     if (searchField.getText().isEmpty()) {
-                        VehiculeController.getInstance().refresh();
+                        ChargementController.getInstance().refresh(null);
                     } else {
-                        VehiculeController.getInstance().filter(searchField.getText());
+                        ChargementController.getInstance().search(searchField.getText());
                     }
                 } else if (CURRENT_VIEW.equals(Constants.DECHARGEMENT)) {
                     System.out.println("Current view " + CURRENT_VIEW);
@@ -410,23 +630,23 @@ public class MainController implements Initializable, ScreensChangeListener {
                 } else if (CURRENT_VIEW.equals(Constants.DEPENSE)) {
                     System.out.println("Current view " + CURRENT_VIEW);
                     if (searchField.getText().isEmpty()) {
-                        VehiculeController.getInstance().refresh();
+                        DepenseController.getInstance().refresh();
                     } else {
-                        VehiculeController.getInstance().filter(searchField.getText());
+                        DepenseController.getInstance().search(searchField.getText());
                     }
                 } else if (CURRENT_VIEW.equals(Constants.CAISSES)) {
                     System.out.println("Current view " + CURRENT_VIEW);
                     if (searchField.getText().isEmpty()) {
-                        VehiculeController.getInstance().refresh();
+                        FinanceController.getInstance().refresh();
                     } else {
-                        VehiculeController.getInstance().filter(searchField.getText());
+                        FinanceController.getInstance().search(searchField.getText());
                     }
                 } else if (CURRENT_VIEW.equals(Constants.RETRAIT)) {
                     System.out.println("Current view " + CURRENT_VIEW);
                     if (searchField.getText().isEmpty()) {
-                        VehiculeController.getInstance().refresh();
+                        RetraitController.getInstance().populate();
                     } else {
-                        VehiculeController.getInstance().filter(searchField.getText());
+                        RetraitController.getInstance().search(searchField.getText());
                     }
                 }
             }

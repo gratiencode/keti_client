@@ -18,7 +18,6 @@ import java.util.UUID;
 import java.util.prefs.Preferences;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -63,15 +62,14 @@ public class SuccursalController implements Initializable, ScreensChangeListener
     Datastorage<Succursale> bd;
 
     private static SuccursalController instance;
-    
-    public static SuccursalController getInstance(){
+
+    public static SuccursalController getInstance() {
         return instance;
     }
 
     public SuccursalController() {
-        instance=this;
+        instance = this;
     }
-    
 
     @FXML
     private Button btn_save_succursale;
@@ -83,8 +81,9 @@ public class SuccursalController implements Initializable, ScreensChangeListener
 
     @FXML
     private Pagination suc_pagination;
-    
-    @FXML ComboBox<Integer> rowsPP;
+
+    @FXML
+    ComboBox<Integer> rowsPP;
 
     @FXML
     private TableView<Succursale> tbl_succs;
@@ -94,11 +93,12 @@ public class SuccursalController implements Initializable, ScreensChangeListener
     TableColumn<Succursale, String> adresse;
     @FXML
     TableColumn<Succursale, String> directeur;
-    @FXML Label count;
-            
+    @FXML
+    Label count;
+
     List<Succursale> suclist;
-    
-    int rowsDataCount=20;
+
+    int rowsDataCount = 20;
 
     @FXML
     private ImageView notify_ok;
@@ -120,12 +120,12 @@ public class SuccursalController implements Initializable, ScreensChangeListener
         tbl_succs.getColumns().clear();
         tbl_succs.getColumns().addAll(nomSuccursale, adresse, directeur);
         tbl_succs.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        
+
         suc_pagination.setPageFactory(this::createDataPage);
-        ObservableList<Integer> rows=FXCollections.observableArrayList(Arrays.asList(20,25,50,100,250,500,1000));
+        ObservableList<Integer> rows = FXCollections.observableArrayList(Arrays.asList(20, 25, 50, 100, 250, 500, 1000));
         rowsPP.setItems(rows);
         rowsPP.getSelectionModel().select(0);
-        
+
     }
 
     @Override
@@ -139,7 +139,7 @@ public class SuccursalController implements Initializable, ScreensChangeListener
     }
 
     public void setLocalDatabase(Nitrite localDatabase) {
-        bd=new Datastorage<>(localDatabase,Succursale.class);
+        bd = new Datastorage<>(localDatabase, Succursale.class);
         suclist = bd.findAll();
         System.err.println("Sucurlist " + suclist.size());
         for (Succursale s : suclist) {
@@ -148,16 +148,16 @@ public class SuccursalController implements Initializable, ScreensChangeListener
         bd.registerListener((ChangeInfo ci) -> {
             if (ci.getChangeType() == ChangeType.UPDATE) {
                 Collection<ChangedItem> changedItems = ci.getChangedItems();
-                System.out.println("Changes "+changedItems.size());
+                System.out.println("Changes " + changedItems.size());
             }
         });
         sync();
     }
-    
-    public void filter(String query){
-        List<Succursale> result=new ArrayList<>();
-        for(Succursale s:suclist){
-            if((s.getAdresse()+" "+s.getDirecteur()+" "+s.getNomSuccursale()).toUpperCase().contains(query.toUpperCase())){
+
+    public void filter(String query) {
+        List<Succursale> result = new ArrayList<>();
+        for (Succursale s : suclist) {
+            if ((s.getAdresse() + " " + s.getDirecteur() + " " + s.getNomSuccursale()).toUpperCase().contains(query.toUpperCase())) {
                 result.add(s);
             }
         }
@@ -166,7 +166,7 @@ public class SuccursalController implements Initializable, ScreensChangeListener
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-               count.setText(result.size()+" Succursales");
+                count.setText(result.size() + " Succursales");
             }
         });
     }
@@ -176,8 +176,8 @@ public class SuccursalController implements Initializable, ScreensChangeListener
         sync();
         datanize();
     }
-    
-    public void datanize(){
+
+    public void datanize() {
         suclist = bd.findAll();
         System.err.println("Sucurlist " + suclist.size());
         tbl_succs.getItems().clear();
@@ -187,10 +187,10 @@ public class SuccursalController implements Initializable, ScreensChangeListener
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-               count.setText(suclist.size()+" Succursales");
+                count.setText(suclist.size() + " Succursales");
             }
         });
-        
+
     }
 
     @FXML
@@ -235,13 +235,14 @@ public class SuccursalController implements Initializable, ScreensChangeListener
         adress_succ.setText(s.getAdresse());
         directeur_succ.setText(s.getDirecteur());
     }
-    
-    @FXML private void selectRowPerPage(ActionEvent evt){
-        ComboBox cbx=(ComboBox)evt.getSource();
-        rowsDataCount=(int)cbx.getSelectionModel().getSelectedItem();
-         suc_pagination.setPageFactory(this::createDataPage);
-         datanize();
-        System.out.println("Row set to "+rowsDataCount);
+
+    @FXML
+    private void selectRowPerPage(ActionEvent evt) {
+        ComboBox cbx = (ComboBox) evt.getSource();
+        rowsDataCount = (int) cbx.getSelectionModel().getSelectedItem();
+        suc_pagination.setPageFactory(this::createDataPage);
+        datanize();
+        System.out.println("Row set to " + rowsDataCount);
     }
 
     @FXML
@@ -250,31 +251,31 @@ public class SuccursalController implements Initializable, ScreensChangeListener
         s.setNomSuccursale(nom_succ.getText());
         s.setAdresse(adress_succ.getText());
         s.setDirecteur(directeur_succ.getText());
-        Succursale i = bd.update("uid",  s.getUid(), s);
-        if (i !=null) {
+        Succursale i = bd.update("uid", s.getUid(), s);
+        if (i != null) {
             MainUI.notify(notify_ok, "Success", "Succursale modifier avec succes", 3);
             datanize();
             keti.updateSuccursale(s.getUid(), s).enqueue(new Callback<Succursale>() {
                 @Override
                 public void onResponse(Call<Succursale> call, Response<Succursale> rspns) {
-                    System.out.println("Update "+rspns.code());
-                 }
+                    System.out.println("Update " + rspns.code());
+                }
 
                 @Override
                 public void onFailure(Call<Succursale> call, Throwable thrwbl) {
-                 }
+                }
             });
         }
     }
-    
-    private void sync(){
+
+    private void sync() {
         keti.getSucursales().enqueue(new Callback<List<Succursale>>() {
             @Override
             public void onResponse(Call<List<Succursale>> call, Response<List<Succursale>> rspns) {
-                if(rspns.isSuccessful()){
-                    List<Succursale> sucs=rspns.body();
-                    for(Succursale s:sucs){
-                        if(bd.findById(s.getUid())==null){
+                if (rspns.isSuccessful()) {
+                    List<Succursale> sucs = rspns.body();
+                    for (Succursale s : sucs) {
+                        if (bd.findById(s.getUid()) == null) {
                             bd.insert(s);
                         }
                     }
@@ -316,14 +317,14 @@ public class SuccursalController implements Initializable, ScreensChangeListener
             keti.removeSucursals(selectedItems).enqueue(new Callback<List<Succursale>>() {
                 @Override
                 public void onResponse(Call<List<Succursale>> call, Response<List<Succursale>> rspns) {
-                    if(rspns.isSuccessful()){
+                    if (rspns.isSuccessful()) {
                         System.out.println("Suppression reuusi");
                     }
                 }
 
                 @Override
                 public void onFailure(Call<List<Succursale>> call, Throwable thrwbl) {
-                    System.err.println("Erreur supression "+thrwbl.getMessage());
+                    System.err.println("Erreur supression " + thrwbl.getMessage());
                 }
             });
         } else {
@@ -351,11 +352,11 @@ public class SuccursalController implements Initializable, ScreensChangeListener
     }
 
     private Node createDataPage(int pgindex) {
-        try{
-        int offset=pgindex*rowsDataCount;
-        int limit=Math.min(offset+rowsDataCount, suclist.size());
-        tbl_succs.setItems(FXCollections.observableArrayList(suclist.subList(offset, limit)));
-        }catch(java.lang.IllegalArgumentException e){
+        try {
+            int offset = pgindex * rowsDataCount;
+            int limit = Math.min(offset + rowsDataCount, suclist.size());
+            tbl_succs.setItems(FXCollections.observableArrayList(suclist.subList(offset, limit)));
+        } catch (java.lang.IllegalArgumentException e) {
             System.out.println("Page suivante non disponible");
         }
         return tbl_succs;

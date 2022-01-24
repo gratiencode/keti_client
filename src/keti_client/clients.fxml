@@ -114,7 +114,7 @@
                         <Image url="@../icons/database32.png" />
                      </image>
                   </ImageView>
-                  <ComboBox fx:id="rowPP" layoutX="854.0" layoutY="542.0" prefHeight="24.0" prefWidth="87.0" visibleRowCount="5" />
+                  <ComboBox fx:id="rowPP" layoutX="854.0" layoutY="542.0" onAction="#selectRowPerPage" prefHeight="24.0" prefWidth="87.0" visibleRowCount="5" />
                   <Label layoutX="731.0" layoutY="546.0" text="Ligne par page : " />
                   <ComboBox fx:id="type_tiers" editable="true" layoutX="197.0" layoutY="274.0" prefHeight="31.0" prefWidth="414.0" promptText="Type de client" />
                   <Label fx:id="count" layoutX="667.0" layoutY="43.0" text="0 elements">

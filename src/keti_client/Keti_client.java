@@ -35,7 +35,6 @@ public class Keti_client extends Application {
         uiController.loadScreen(Constants.CAISSES, Constants.CAISSE_VIEW);
         uiController.loadScreen(Constants.CHARGEMENT, Constants.CHARGEMENT_VIEW);
         uiController.loadScreen(Constants.CLIENTS, Constants.CLIENT_VIEW);
-        uiController.loadScreen(Constants.DECHARGEMENT, Constants.DECHARGEMENT_VIEW);
         uiController.loadScreen(Constants.DEPENSE, Constants.DEPENSE_VIEW);
         uiController.loadScreen(Constants.RETRAIT, Constants.RETRAIT_VIEW);
         uiController.loadScreen(Constants.VEHICULES, Constants.VEHICULE_VIEW);

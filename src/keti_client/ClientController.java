@@ -155,6 +155,18 @@ public class ClientController implements Initializable, ScreensChangeListener {
         }
         return tblTiers;
     }
+    
+    @FXML private void selectRowPerPage(ActionEvent evt){
+        ComboBox cbx=(ComboBox)evt.getSource();
+        rowsDataCount=(int)cbx.getSelectionModel().getSelectedItem();
+         pagination.setPageFactory(this::createDataPage);
+        try {
+            refresh();
+        } catch (IOException ex) {
+            Logger.getLogger(ClientController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        System.out.println("Row set to "+rowsDataCount);
+    }
 
     public void setToken(String token) {
         this.token = token;
@@ -323,16 +335,17 @@ public class ClientController implements Initializable, ScreensChangeListener {
 
     }
     
-    @FXML public void refresh(MouseEvent evt){
+    @FXML 
+    public void refresh(MouseEvent evt){
         try {
             refresh();
-             
         } catch (IOException ex) {
             Logger.getLogger(ClientController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    @FXML public void delete(MouseEvent evt){
+    @FXML 
+    public void delete(MouseEvent evt){
         String tuid=tblTiers.getSelectionModel().getSelectedItem().getTiers().getUid();
         cltdb.delete("uid", tuid);
         List<Contacts> lc=contactdb.findAllEquals("idTiers", tuid);
