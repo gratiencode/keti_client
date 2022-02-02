@@ -307,7 +307,7 @@ public class VehiculeController implements Initializable, ScreensChangeListener 
                 vehiculesdb.delete("uid", v.getUid());
             });
             tblVeh.getItems().removeAll(selectedItems);
-            MainUI.notify(notify, "Succes", "Vehicule suprimer avec succes", 4);
+            MainUI.notify(notify, "Succes", "Vehicule suprimer avec succes", 4,"Info");
             keti.deleteVehicule(selectedItems.get(0).getUid()).enqueue(new Callback<Vehicule>() {
                 @Override
                 public void onResponse(Call<Vehicule> call, Response<Vehicule> rspns) {

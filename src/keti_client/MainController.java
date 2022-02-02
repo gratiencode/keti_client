@@ -5,7 +5,6 @@
  */
 package keti_client;
 
-import com.sun.glass.ui.MenuItem;
 import com.sun.javafx.PlatformUtil;
 import core.KetiAPI;
 import core.KetiHelper;
@@ -15,7 +14,6 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +35,7 @@ import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitMenuButton;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -52,6 +51,7 @@ import model.Tiers;
 import model.Transporter;
 import model.Vehicule;
 import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.NitriteBuilder;
 import util.Constants;
 import util.Datastorage;
 import util.LoginResult;
@@ -73,6 +73,7 @@ public class MainController implements Initializable, ScreensChangeListener {
     private LoginResult longinResult;
 
     Nitrite db;
+    NitriteBuilder nb;
 
     @FXML
     private TextField searchField;
@@ -162,8 +163,6 @@ public class MainController implements Initializable, ScreensChangeListener {
     public void initialize(URL location, ResourceBundle resources) {
         installTooltips();
         initDb();
-        System.out.println("Initializing...");
-        // MainController.mainPane = mainpane;
 
     }
 
@@ -199,12 +198,16 @@ public class MainController implements Initializable, ScreensChangeListener {
                     }
                 }
             }
-            db = Nitrite.builder()
-                    .filePath(file)
-                    .openOrCreate();
+
+            nb = Nitrite.builder()
+                    .compressed()
+                    .filePath(file);
+            db = nb.openOrCreate();
+
         }
         transdb = new Datastorage<>(db, Transporter.class);
         tiers = new Datastorage<>(db, Tiers.class);
+        dpenses = new Datastorage(db, Payer.class);
 
     }
 
@@ -287,10 +290,10 @@ public class MainController implements Initializable, ScreensChangeListener {
         });
         SyncEngine se = new SyncEngine(KETI, db);
         se.start();
+
+        double dep = figureOutExpense(dpenses.findAll());
         loadSaleChart();
         loadClientChart();
-        dpenses = new Datastorage(db, Payer.class);
-        double dep = figureOutExpense(dpenses.findAll());
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -309,6 +312,7 @@ public class MainController implements Initializable, ScreensChangeListener {
         user_connected.setText(username);
         //user_connected.getItems().clear();
         // connected_user_.setText(username);
+
     }
 
     public double figureOutExpense(List<Payer> payer) {
@@ -323,7 +327,7 @@ public class MainController implements Initializable, ScreensChangeListener {
                 cal.setTime(p.getDatePayement());
                 int pyear = cal.get(Calendar.YEAR);
                 int pmonth = cal.get(Calendar.MONTH) + 1;
-                if (pyear==year && month==pmonth) {
+                if (pyear == year && month == pmonth) {
                     sommeDep += p.getMontantPaye();
                 }
             }
@@ -332,7 +336,7 @@ public class MainController implements Initializable, ScreensChangeListener {
     }
 
     private void loadSaleChart() {
-        List<Tiers> trss = new Datastorage<>(db, Tiers.class).findAll();
+        List<Tiers> trss = tiers.findAll();
         List<Transporter> ltr = transdb.findAll();
         List<Vehicule> lv = extractvehicules(ltr);
         for (Vehicule v : lv) {
@@ -529,6 +533,19 @@ public class MainController implements Initializable, ScreensChangeListener {
     }
 
     @FXML
+    public void switchToPerformance(MouseEvent me) {
+        gotoPerformances();
+    }
+
+    public void gotoPerformances() {
+        Pane p = MainUI.getPage(this, Constants.PERFORMANCE_VIEW, token, db);
+        mainpane.getChildren().remove(0);
+        mainpane.getChildren().add(p);
+        pane_title.setText("Performance");
+        CURRENT_VIEW = Constants.PERFORMANCE;
+    }
+
+    @FXML
     public void switchToDashBoard(MouseEvent evt) {
         mainpane.getChildren().remove(0);
         mainpane.getChildren().add(showPane);
@@ -543,7 +560,7 @@ public class MainController implements Initializable, ScreensChangeListener {
     }
 
     public void gotoecriture(Comptefin cpt) {
-        Pane p = MainUI.getPage(this, "depenses.fxml", token, db, cpt);
+        Pane p = MainUI.getPage(this, "depenses.fxml", token, db, cpt, longinResult.getSuccursale());
         mainpane.getChildren().remove(0);
         mainpane.getChildren().add(p);
         pane_title.setText("Ecritures");
@@ -603,13 +620,7 @@ public class MainController implements Initializable, ScreensChangeListener {
                 } else if (CURRENT_VIEW.equals(Constants.CLIENTS)) {
                     System.out.println("Current view " + CURRENT_VIEW);
                     if (searchField.getText().isEmpty()) {
-                        try {
-                            ClientController.getInstance().refresh();
-
-                        } catch (IOException ex) {
-                            Logger.getLogger(MainController.class
-                                    .getName()).log(Level.SEVERE, null, ex);
-                        }
+                        ClientController.getInstance().refresh();
                     } else {
                         ClientController.getInstance().filter(searchField.getText());
                     }
@@ -620,12 +631,12 @@ public class MainController implements Initializable, ScreensChangeListener {
                     } else {
                         ChargementController.getInstance().search(searchField.getText());
                     }
-                } else if (CURRENT_VIEW.equals(Constants.DECHARGEMENT)) {
+                } else if (CURRENT_VIEW.equals(Constants.PERFORMANCE)) {
                     System.out.println("Current view " + CURRENT_VIEW);
                     if (searchField.getText().isEmpty()) {
-                        VehiculeController.getInstance().refresh();
+                        PerformanceController.getInstance().refresh();
                     } else {
-                        VehiculeController.getInstance().filter(searchField.getText());
+                        PerformanceController.getInstance().search(searchField.getText());
                     }
                 } else if (CURRENT_VIEW.equals(Constants.DEPENSE)) {
                     System.out.println("Current view " + CURRENT_VIEW);
@@ -661,6 +672,28 @@ public class MainController implements Initializable, ScreensChangeListener {
 
     public void setLonginResult(LoginResult longinResult) {
         this.longinResult = longinResult;
+        MenuItem m1 = new MenuItem("Utilisateurs");
+        MenuItem m2 = new MenuItem("Quitter");
+        String role = longinResult.getRole();
+        user_connected.getItems().clear();
+        if (role.equalsIgnoreCase("Administrator")
+                || role.equalsIgnoreCase("Associe")
+                || role.equalsIgnoreCase("Directeur")) {
+            user_connected.getItems().add(m1);
+        } else {
+            user_connected.getItems().remove(m1);
+        }
+        user_connected.getItems().add(m2);
+        m2.setOnAction(e -> {
+            db.compact();
+            db.commit();
+            db.close();
+            System.exit(0);
+        });
+        m1.setOnAction(e -> {
+            //gestion des utilisateurs ici
+            MainUI.floatDialog("utilisateurs.fxml", 603, 710, token, db);
+        });
     }
 
 }

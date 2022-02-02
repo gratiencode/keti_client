@@ -65,7 +65,7 @@ public class ClientController implements Initializable, ScreensChangeListener {
 
     Datastorage<Tiers> cltdb;
     Datastorage<Contacts> contactdb;
-    List<TierView> tiersTab = new ArrayList<>();
+    ObservableList<TierView> tiersTab;
 
     @FXML
     Label count;
@@ -122,6 +122,7 @@ public class ClientController implements Initializable, ScreensChangeListener {
         configTable();
         configComboBoxes();
         pagination.setPageFactory(this::createDataPage);
+        tiersTab = FXCollections.observableArrayList();
     }
 
     private void configTable() {
@@ -130,9 +131,9 @@ public class ClientController implements Initializable, ScreensChangeListener {
         colAdresse.setCellValueFactory((TableColumn.CellDataFeatures<TierView, String> param) -> new SimpleStringProperty(param.getValue().getTiers().getAdresse()));
         colType.setCellValueFactory((TableColumn.CellDataFeatures<TierView, String> param) -> new SimpleStringProperty(param.getValue().getTiers().getTypetiers()));
         colcontacts.setCellValueFactory((TableColumn.CellDataFeatures<TierView, String> param) -> new SimpleStringProperty(param.getValue().getContacts().getPhone()));
-        tblTiers.getColumns().clear();
-        tblTiers.getColumns().addAll(colNom, colprenom, colAdresse, colType, colcontacts);
-        tblTiers.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+//        tblTiers.getColumns().clear();
+//        tblTiers.getColumns().addAll(colNom, colprenom, colAdresse, colType, colcontacts);
+//        tblTiers.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
     }
 
@@ -155,17 +156,16 @@ public class ClientController implements Initializable, ScreensChangeListener {
         }
         return tblTiers;
     }
-    
-    @FXML private void selectRowPerPage(ActionEvent evt){
-        ComboBox cbx=(ComboBox)evt.getSource();
-        rowsDataCount=(int)cbx.getSelectionModel().getSelectedItem();
-         pagination.setPageFactory(this::createDataPage);
-        try {
-            refresh();
-        } catch (IOException ex) {
-            Logger.getLogger(ClientController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        System.out.println("Row set to "+rowsDataCount);
+
+    @FXML
+    private void selectRowPerPage(ActionEvent evt) {
+        ComboBox cbx = (ComboBox) evt.getSource();
+        rowsDataCount = (int) cbx.getSelectionModel().getSelectedItem();
+        pagination.setPageFactory(this::createDataPage);
+
+        refresh();
+
+        System.out.println("Row set to " + rowsDataCount);
     }
 
     public void setToken(String token) {
@@ -181,11 +181,8 @@ public class ClientController implements Initializable, ScreensChangeListener {
         this.localDatabase = localDatabase;
         this.cltdb = new Datastorage<>(this.localDatabase, Tiers.class);
         this.contactdb = new Datastorage<>(this.localDatabase, Contacts.class);
-        try {
-            refresh();
-        } catch (IOException ex) {
-            Logger.getLogger(ClientController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        refresh();
+
     }
 
     @FXML
@@ -300,7 +297,7 @@ public class ClientController implements Initializable, ScreensChangeListener {
             tvc += phone3.getText() + ",";
         }
         if (uv != null) {
-            MainUI.notify(notify, "Succès", "Tiers modifié avec succès", 3);
+            MainUI.notify(notify, "Succès", "Tiers modifié avec succès", 3,"Info");
             // refresh();
             //here come API update
             keti.updateTier(uv.getUid(), uv).enqueue(new Callback<Tiers>() {
@@ -334,21 +331,18 @@ public class ClientController implements Initializable, ScreensChangeListener {
         }
 
     }
-    
-    @FXML 
-    public void refresh(MouseEvent evt){
-        try {
-            refresh();
-        } catch (IOException ex) {
-            Logger.getLogger(ClientController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+
+    @FXML
+    public void refresh(MouseEvent evt) {
+        refresh();
+
     }
-    
-    @FXML 
-    public void delete(MouseEvent evt){
-        String tuid=tblTiers.getSelectionModel().getSelectedItem().getTiers().getUid();
+
+    @FXML
+    public void delete(MouseEvent evt) {
+        String tuid = tblTiers.getSelectionModel().getSelectedItem().getTiers().getUid();
         cltdb.delete("uid", tuid);
-        List<Contacts> lc=contactdb.findAllEquals("idTiers", tuid);
+        List<Contacts> lc = contactdb.findAllEquals("idTiers", tuid);
         try {
             Response<Tiers> exec = keti.deleteTier(tuid).execute();
             ResponseBody body = keti.deleteContacts(lc).execute().body();
@@ -357,37 +351,43 @@ public class ClientController implements Initializable, ScreensChangeListener {
             Logger.getLogger(ClientController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    List<Contacts> contactForClient(List<Contacts> lc,Tiers t){
+        List<Contacts> rst=new ArrayList<>();
+        for(Contacts c:lc){
+            if(c.getIdTiers().equals(t)){
+               rst.add(c);
+            }
+        }
+        return rst;
+    }
 
-    public void refresh() throws IOException {
-        tblTiers.getItems().clear();
-        Call<List<Tiers>> tiers = keti.getTiers();
-        Response<List<Tiers>> execute = tiers.execute();
-        List<Tiers> lst=execute.body();
-        for(Tiers t:lst){
-            cltdb.insertIfNotExist(t,t.getUid());
-            Call<List<Contacts>> contakt = keti.findContacts(t.getUid());
-            Response<List<Contacts>> lcont = contakt.execute();
-            List<Contacts> body = lcont.body();
-            for(Contacts c:body){
-                contactdb.insertIfNotExist(c,c.getUid());
-            }
-        }
-        List<Tiers> lt=cltdb.findAll();
-        for(Tiers t:lt){
-            List<Contacts> cts = contactdb.findAllEquals("id_tiers", t.getUid());
-             String ct="";
-            for(Contacts c:cts){
-                 ct+=c.getPhone()+",";
-            }
-            Contacts c=new Contacts();
-            c.setPhone(ct);
-            TierView tv=new TierView();
+    private List<TierView> toTiersView(List<Tiers> ltr) {
+        List<TierView> ltx = new ArrayList<>();
+        for (Tiers t : ltr) {
+            TierView tv = new TierView();
             tv.setTiers(t);
+            List<Contacts> cts =contactForClient(contactdb.findAll(), t);
+            if(cts==null){
+                continue;
+            }
+            String ct = "";
+            for (Contacts c : cts) {
+                ct += c.getPhone() + ",";
+            }
+            Contacts c = new Contacts();
+            c.setPhone(ct);
             tv.setContacts(c);
-            tiersTab.add(tv);
-            tblTiers.getItems().addAll(tiersTab); 
+            ltx.add(tv);
         }
-        count.setText(tblTiers.getItems().size()+" Tiers");
+        return ltx;
+    }
+
+    public void refresh() {
+        tiersTab.clear();
+        tiersTab.addAll(toTiersView(cltdb.findAll()));
+        tblTiers.setItems(tiersTab);
+        count.setText(tblTiers.getItems().size() + " Tiers");
     }
 
     @FXML

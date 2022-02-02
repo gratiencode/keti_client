@@ -14,7 +14,10 @@ import javafx.scene.input.InputEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
+import model.Comptefin;
+import model.Depense;
 import model.Tiers;
+import model.Transporter;
 import model.Vehicule;
 
 /**
@@ -79,6 +82,21 @@ public class ComboBoxAutoCompletion<T> implements EventHandler {
             } else if (datum instanceof Vehicule) {
                 Vehicule vehicule = (Vehicule) datum;
                 if (vehicule.toString().toUpperCase().contains(s.toUpperCase())) {
+                    list.add(datum);
+                }
+            }else if (datum instanceof Transporter) {
+                Transporter transporter = (Transporter) datum;
+                if (String.valueOf(transporter.getTracking()).toUpperCase().contains(s.toUpperCase())) {
+                    list.add(datum);
+                }
+            }else if (datum instanceof Comptefin) {
+                Comptefin comptefin = (Comptefin) datum;
+                if ((comptefin.getLibelle()+" "+comptefin.getSucursaleId().getNomSuccursale()).toUpperCase().contains(s.toUpperCase())) {
+                    list.add(datum);
+                }
+            }else if (datum instanceof Depense) {
+                Depense depense = (Depense) datum;
+                if (depense.getLibelle().toUpperCase().contains(s.toUpperCase())) {
                     list.add(datum);
                 }
             }

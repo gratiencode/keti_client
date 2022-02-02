@@ -7,6 +7,8 @@ package keti_client;
 
 import core.KetiAPI;
 import core.KetiHelper;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.prefs.Preferences;
 import javafx.application.Platform;
@@ -29,12 +32,15 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Pagination;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -49,8 +55,11 @@ import model.Payer;
 import model.Retirer;
 import model.Tiers;
 import model.Transporter;
+import model.Vehicule;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.objects.ObjectRepository;
+import retrofit2.Call;
+import retrofit2.Response;
 import util.ComboBoxAutoCompletion;
 import util.Constants;
 import util.DataId;
@@ -148,6 +157,7 @@ public class RetraitController implements Initializable, ScreensChangeListener {
         new ComboBoxAutoCompletion<>(transporters_names_cbx);
         dpkRetr.setValue(LocalDate.now());
         setPattern(dpkRetr);
+        transviewlist.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
     }
 
@@ -224,25 +234,29 @@ public class RetraitController implements Initializable, ScreensChangeListener {
         populate();
     }
 
+    public RetraitView toRetraitView(Retirer r) {
+        Tiers t = r.getTiersId();
+        RetraitView rv = new RetraitView();
+        rv.setClient(t.getPrenom() + " " + t.getNom());
+        rv.setDateRetrait(r.getDateRet());
+        rv.setMarchandise(r.getTransId().getIdMarchandise().getNomMarchandise() + ""
+                + " " + r.getTransId().getIdMarchandise().getDescription());
+        rv.setQuantiteLoaded(r.getTransId().getQuantite());
+        rv.setQuantiteRetire(r.getQuantiteRet());
+        rv.setQuantiteRestant(r.getQuantiteRest());
+        rv.setTracking(r.getReference());
+        rv.setUid(r.getUid());
+        rv.setValeurLoaded(r.getTransId().getPriceToPay());
+        rv.setValeurRestant(r.getValeurRest());
+        rv.setValeurRetire(r.getValeurRet());
+        return rv;
+    }
+
     public void populate() {
         List<Retirer> retrs = retraitstore.findAll();
-        tbl_retrait.getItems().clear();
+        retraitsvu.clear();
         for (Retirer r : retrs) {
-            Tiers t = r.getTiersId();
-            RetraitView rv = new RetraitView();
-            rv.setClient(t.getPrenom() + " " + t.getNom());
-            rv.setDateRetrait(r.getDateRet());
-            rv.setMarchandise(r.getTransId().getIdMarchandise().getNomMarchandise()+""
-                    + " "+r.getTransId().getIdMarchandise().getDescription());
-            rv.setQuantiteLoaded(r.getTransId().getQuantite());
-            rv.setQuantiteRetire(r.getQuantiteRet());
-            rv.setQuantiteRestant(r.getQuantiteRest());
-            rv.setTracking(r.getReference());
-            rv.setUid(r.getUid());
-            rv.setValeurLoaded(r.getTransId().getPriceToPay());
-            rv.setValeurRestant(r.getValeurRest());
-            rv.setValeurRetire(r.getValeurRet());
-            retraitsvu.add(rv);
+            retraitsvu.add(toRetraitView(r));
         }
         Collections.reverse(retraitsvu);
         tbl_retrait.setItems(retraitsvu);
@@ -254,29 +268,63 @@ public class RetraitController implements Initializable, ScreensChangeListener {
         if (quantRetr.getText().isEmpty() || choosenClient == null || choosenTracking == null) {
             return;
         }
+
+        double oldq = calcRetrait(choosenTracking.getUid());
         double qload = choosenTracking.getQuantite();
         double payload = choosenTracking.getPriceToPay();
         double qret = Double.parseDouble(quantRetr.getText());
         double rate = qret / qload;
         double qpretv = payload * rate;
         double valrest = payload - qpretv;
-        double qrest = qload - qret;
+        double qrest = qload - (qret+oldq);
+        if(qret>qrest){
+            MainUI.notify(null, "Erreur", "Veuillez entrer une quanite valide", 4, "error");
+            return;
+        }
         Retirer r = new Retirer(DataId.generate());
         r.setDateRet(Constants.toUtilDate(dpkRetr.getValue()));
         r.setTiersId(choosenClient);
         r.setTransId(choosenTracking);
-        r.setValeurRest(valrest);
+        r.setValeurRest(valrest<=0?0:valrest);
         r.setValeurRet(qpretv);
-        r.setQuantiteRest(qrest);
+        r.setQuantiteRest(qrest<=0?0:qrest);
         r.setQuantiteRet(qret);
         r.setReference(choosenTracking.getTracking());
         Retirer retsaved = retraitstore.insert(r);
         if (retsaved != null) {
-            choosenTracking.setObservation(qrest <= 0 ? "Rétiré" : qrest == qload ? "A rétirer" : "Retrait partiel");
+            choosenTracking.setObservation((qrest <= 0) ? "Rétiré" : (qrest == qload) ? "A rétirer" : "Retrait partiel");
             transtore.update("uid", choosenTracking.getUid(), choosenTracking);
+            retraitsvu.add(toRetraitView(r));
             MainUI.notify(null, "Succès", "Retrait enregistré avec succès", 4, "Info");
-            populate();
         }
+    }
+
+    private double calcRetrait(String uid) {
+        List<Retirer> oldret = findRetraits(retraitstore.findAll(), uid);
+        double s = 0;
+
+        for (Retirer r : oldret) {
+            s += r.getQuantiteRet();
+        }
+        return s;
+    }
+
+    List<Retirer> findRetraits(List<Retirer> lr, String truid) {
+        List<Retirer> result = new ArrayList<>();
+        for (Retirer r : lr) {
+            if (r.getTransId().getUid().equals(truid)) {
+                result.add(r);
+            }
+        }
+        return result;
+    }
+
+    private double cs(List<Transporter> cls) {
+        double somme = 0;
+        for (Transporter t : cls) {
+            somme += t.getPriceToPay();
+        }
+        return somme;
     }
 
     private void configCombos() {
@@ -329,7 +377,7 @@ public class RetraitController implements Initializable, ScreensChangeListener {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
-                        valueTracked.setText(tracks.size() + " Colis transportés à : $" + choosenTracking.getPriceToPay());
+                        valueTracked.setText(tracks.size() + " Colis transportés à : $" + cs(tracks));
                     }
                 });
                 transviewlist.getItems().clear();
@@ -349,10 +397,13 @@ public class RetraitController implements Initializable, ScreensChangeListener {
             choosenTracking = newValue.getTransporter();
             double q = choosenTracking.getQuantite();
             double v = choosenTracking.getPriceToPay();
+            double old = calcRetrait(choosenTracking.getUid());
+            System.err.println("Retrait old " + old);
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    valueToRet.setText(q + " " + choosenTracking.getIdMarchandise().getNomMarchandise() + " à $" + v);
+                    double val = (old == 0) ? v : BigDecimal.valueOf(v * ((q - old) / q)).setScale(3, RoundingMode.HALF_UP).doubleValue();
+                    valueToRet.setText((q - old) + " " + choosenTracking.getIdMarchandise().getNomMarchandise() + " à $" + val);
                 }
             });
 
@@ -369,6 +420,53 @@ public class RetraitController implements Initializable, ScreensChangeListener {
     private void onOutHome(MouseEvent event) {
         ImageView img = (ImageView) event.getSource();
         MainUI.removeShaddowEffect(img);
+    }
+    Transporter tr;
+    Retirer r;
+
+    @FXML
+    private void pickElementFromTable(Event evt) {
+        RetraitView selectobj = tbl_retrait.getSelectionModel().getSelectedItem();
+        if (selectobj == null) {
+            return;
+        }
+        r = retraitstore.findById(selectobj.getUid());
+        tr = transtore.findById(r.getTransId().getUid());
+        transporters_names_cbx.getSelectionModel().select(tr);
+    }
+
+    @FXML
+    private void delete(Event evt) {
+        if (r != null) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Voulez vous vraiment supprimer le retrait " + r.getReference() + " selectionné", ButtonType.YES, ButtonType.CANCEL);
+            alert.setTitle("Attention!");
+            alert.setHeaderText(null);
+            Optional<ButtonType> showAndWait = alert.showAndWait();
+            if (showAndWait.get() == ButtonType.YES) {
+                retraitstore.delete("uid", r.getUid());
+                MainUI.notify(null, "Succes", "Retrait suprimé avec succès", 4,"Info");
+                keti.deleteRetirer(r.getUid()).enqueue(new retrofit2.Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> rspns) {
+                        if (rspns.isSuccessful()) {
+                            System.out.println("Suppression reussi");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable thrwbl) {
+                        System.err.println("Erreur " + thrwbl.getMessage());
+                    }
+                });
+            } else {
+                alert.hide();
+            }
+        } else {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "La selection est vide");
+            alert.setTitle("Selectionez un element!");
+            alert.setHeaderText(null);
+            alert.show();
+        }
     }
 
     @FXML

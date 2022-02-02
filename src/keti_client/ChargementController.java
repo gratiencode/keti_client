@@ -202,14 +202,20 @@ public class ChargementController implements Initializable, ScreensChangeListene
                 return new TextFieldTreeTableCell<>();
             }
         });
-        ObservableList<String> ols = FXCollections.observableArrayList("A rétirer", "Rétiré", "Retrait partiel");
+        ObservableList<String> ols = FXCollections.observableArrayList("A rétirer", "Rétiré", "Retrait partiel","Perdus","Perte partielle");
         tricoletat.setCellFactory(ChoiceBoxTreeTableCell.forTreeTableColumn(ols));
         tricoletat.setOnEditCommit(new EventHandler<TreeTableColumn.CellEditEvent<TransporterView, String>>() {
             @Override
             public void handle(TreeTableColumn.CellEditEvent<TransporterView, String> event) {
                 TreeItem<TransporterView> transvu = tbl_tranporterViews.getTreeItem(event.getTreeTablePosition().getRow());
                 Transporter t = transvu.getValue().getTransporter();
-                t.setObservation(event.getNewValue());
+                String obs=event.getNewValue();
+                if(obs.equalsIgnoreCase("Perdus")){
+                    
+                }else if(obs.equalsIgnoreCase("Perte partielle")){
+                    
+                }
+                t.setObservation(obs);
                 transdb.update("uid", t.getUid(), t);
 //                try {
 //                    Response<Transporter> execute = keti.updateTransporter(t.getUid(), t).execute();
@@ -249,7 +255,6 @@ public class ChargementController implements Initializable, ScreensChangeListene
         ComboBox cbx = (ComboBox) evt.getSource();
         rowsDataCount = (int) cbx.getSelectionModel().getSelectedItem();
         pagination.setPageFactory(this::createDataPage);
-
         refresh(null);
         System.out.println("Row set to " + rowsDataCount);
     }
@@ -354,7 +359,7 @@ public class ChargementController implements Initializable, ScreensChangeListene
         return result;
     }
 
-    private TransporterView fromArg(long cont, TransporterView tv, double sum2pay, double sumPaid) {
+    private TransporterView fromArg(long cont,TransporterView tv, double sum2pay, double sumPaid) {
         TransporterView tvx = new TransporterView();//
         Marchandise mz = new Marchandise(tv.getMarchandise().getUid(), tv.getMarchandise().getNomMarchandise() + " et " + cont + " autres bagages");
         mz.setDescription(tv.getMarchandise().getDescription());

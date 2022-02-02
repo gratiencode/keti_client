@@ -27,15 +27,19 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import keti_client.ChargementController;
 import keti_client.ClientController;
-import keti_client.Keti_client;
+import keti_client.DepenseController;
+import keti_client.FinanceController;
 import keti_client.MainController;
 import keti_client.MarchandiseController;
 import keti_client.PanierController;
 import keti_client.SuccursalController;
 import keti_client.TransporterController;
-import keti_client.UIController;
 import keti_client.VehiculeController;
 import keti_client.KetiGateController;
+import keti_client.PerformanceController;
+import keti_client.RetraitController;
+import keti_client.UtilisateurController;
+import model.Comptefin;
 import model.Marchandise;
 import model.Succursale;
 import model.Tiers;
@@ -55,7 +59,7 @@ public class MainUI {
     private static double yOffset = 0;
     public static Stage mainStage;
 
-    public static void replaceView(Class theClass, String fxmlPath, int h, int w, String user, String token,LoginResult loginr) {
+    public static void replaceView(Class theClass, String fxmlPath, int h, int w, String user, String token, LoginResult loginr) {
         try {
 
             FXMLLoader fxmlLoader = new FXMLLoader(theClass.getResource(fxmlPath));
@@ -110,37 +114,39 @@ public class MainUI {
         return null;
     }
 
-    public static void floatDialog(String res, int w, int h,String token,Nitrite db,Object... objs) {
+    public static void floatDialog(String res, int w, int h, String token, Nitrite db, Object... objs) {
         FXMLLoader fxmlLoader = new FXMLLoader(MainController.class.getResource(res));
         try {
             Parent load = fxmlLoader.load();
-             switch (res) {
+            switch (res) {
                 case Constants.TRANSPORTER_DLG:
-                    Succursale suk=(Succursale) objs[0];
+                    Succursale suk = (Succursale) objs[0];
                     TransporterController controller = fxmlLoader.<TransporterController>getController();
                     controller.setToken(token);
                     controller.setLocalDatabase(db);
-                    controller.setCurrentSuccursale(suk);                 
+                    controller.setCurrentSuccursale(suk);
                     break;
                 case Constants.MARCHANDISE_DLG:
                     MarchandiseController mcontroller = fxmlLoader.<MarchandiseController>getController();
                     mcontroller.setLocalDatabase(db);
                     break;
                 case Constants.ADDTOCART_DLG:
-                    Tiers trs=(Tiers) objs[0];
-                    Marchandise m=(Marchandise)objs[1];
-                    Vehicule veh=(Vehicule) objs[2];
-                    Integer track=(Integer) objs[3];
-                    Succursale s=(Succursale) objs[4];
+                    Tiers trs = (Tiers) objs[0];
+                    Marchandise m = (Marchandise) objs[1];
+                    Vehicule veh = (Vehicule) objs[2];
+                    Integer track = (Integer) objs[3];
+                    Succursale s = (Succursale) objs[4];
                     PanierController pcontroller = fxmlLoader.<PanierController>getController();
                     pcontroller.setMarchandise(m);
                     pcontroller.setTiers(trs);
                     pcontroller.setVehicule(veh);
                     pcontroller.setTracking(track);
-                    pcontroller.setSuccursale(s); 
+                    pcontroller.setSuccursale(s);
                     break;
-                case Constants.VEHICULE_VIEW:
-                    
+                case Constants.USERCREATOR_DLG: 
+                    UtilisateurController xcontroller = fxmlLoader.<UtilisateurController>getController();
+                    xcontroller.setToken(token); 
+                    xcontroller.setDatabase(db);
                     break;
 
             }
@@ -175,7 +181,7 @@ public class MainUI {
         return null;
     }
 
-    public static Pane getPage(Initializable init, String ress, String token, Nitrite db,Object... objs) {
+    public static Pane getPage(Initializable init, String ress, String token, Nitrite db, Object... objs) {
         try {
 
             FXMLLoader fxmlLoader = new FXMLLoader(init.getClass().getResource(ress));
@@ -188,11 +194,11 @@ public class MainUI {
 
                     break;
                 case Constants.CHARGEMENT_VIEW:
-                    Succursale sc=(Succursale) objs[0];
-                    ChargementController ccontr = fxmlLoader.<ChargementController>getController();
-                    ccontr.setToken(token);
-                    ccontr.setLocalDatabase(db);
-                    ccontr.setCurrentSuccursale(sc);
+                    Succursale sc = (Succursale) objs[0];
+                    ChargementController chcontr = fxmlLoader.<ChargementController>getController(); 
+                    chcontr.setToken(token);
+                    chcontr.setLocalDatabase(db);
+                    chcontr.setCurrentSuccursale(sc);
                     break;
                 case Constants.CLIENT_VIEW:
                     ClientController cclt = fxmlLoader.<ClientController>getController();
@@ -204,6 +210,30 @@ public class MainUI {
                     vctrl.setToken(token);
                     vctrl.setDatabase(db);
                     break;
+                case Constants.CAISSE_VIEW:
+                    Succursale sci = (Succursale) objs[0];
+                    FinanceController fc = fxmlLoader.<FinanceController>getController();
+                    fc.setSucursaleId(sci);
+                    fc.setToken(db, token);
+                    break;
+                case Constants.DEPENSE_VIEW:
+                    Object o = objs[0];
+                    sc=(Succursale)objs[1];
+                    Comptefin cpt = o != null ? (Comptefin) o : null;
+                    DepenseController dpc = fxmlLoader.<DepenseController>getController();
+                    dpc.setCompteFinSelected(cpt);
+                    dpc.setToken(db, token);
+                    dpc.setSuccursale(sc);
+                    break;
+                case Constants.RETRAIT_VIEW:
+                    RetraitController rc = fxmlLoader.<RetraitController>getController();
+                    rc.setLocalDatabase(db);
+                    rc.setToken(token);
+                    break;
+                case Constants.PERFORMANCE_VIEW:
+                    PerformanceController pc = fxmlLoader.<PerformanceController>getController();
+                    pc.setToken(db,token);
+                    break;
 
             }
 
@@ -214,16 +244,25 @@ public class MainUI {
         return null;
     }
 
-    public static void notify(Node graph, String title, String message, double duration) {
-        graph.setVisible(true);
-        Notifications.create()
+    public static void notify(Node graph, String title, String message, double duration, String... type) {
+        Notifications n = Notifications.create()
                 .title(title)
-                .graphic(graph)
                 .text(message)
                 .position(Pos.TOP_RIGHT)
-                .hideAfter(Duration.seconds(duration))
-                .show();
-        graph.setVisible(false);
+                .hideAfter(Duration.seconds(duration));
+        String tp = type[0];
+        if (graph == null) {
+            if (tp.equalsIgnoreCase("warning")) {
+                n.showWarning();
+            } else if (tp.equalsIgnoreCase("error")) {
+                n.showError();
+            } else {
+                n.showInformation();
+            }
+        } else {
+            n.graphic(graph);
+            n.show();
+        }
     }
 
     public static Nitrite initDatabase() {

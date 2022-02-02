@@ -3,6 +3,7 @@
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
@@ -143,22 +144,24 @@
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: white;">
                            <children>
-                              <TextField fx:id="design_dep" layoutX="98.0" layoutY="188.0" prefHeight="31.0" prefWidth="353.0" promptText="Nouveau depense" />
-                              <ComboBox fx:id="dep_comptefin" editable="true" layoutX="100.0" layoutY="130.0" prefHeight="31.0" prefWidth="388.0" promptText="Compte financier" />
+                              <TextField fx:id="design_dep" layoutX="98.0" layoutY="203.0" prefHeight="31.0" prefWidth="353.0" promptText="Nouveau depense" />
+                              <ComboBox fx:id="dep_comptefin" editable="true" layoutX="100.0" layoutY="144.0" prefHeight="31.0" prefWidth="177.0" promptText="Compte financier" />
                               <Separator layoutX="59.0" layoutY="91.0" prefHeight="0.0" prefWidth="474.0" />
                               <Label layoutX="28.0" layoutY="50.0" prefHeight="26.0" prefWidth="287.0" text="Décaissement pour dépense">
                                  <font>
                                     <Font size="22.0" />
                                  </font>
                               </Label>
-                              <ComboBox fx:id="depenses" editable="true" layoutX="99.0" layoutY="188.0" prefHeight="31.0" prefWidth="353.0" promptText="Nom de la depense" />
-                              <Separator layoutX="59.0" layoutY="356.0" prefHeight="0.0" prefWidth="474.0" />
-                              <TextField fx:id="montant_depense" layoutX="98.0" layoutY="299.0" prefHeight="31.0" prefWidth="389.0" promptText="Entrer le montant de la depense" />
-                              <Button layoutX="380.0" layoutY="381.0" mnemonicParsing="false" onAction="#saveDepense" prefHeight="40.0" prefWidth="110.0" style="-fx-background-color: #66aaee;" text="Enregistrer" textFill="#f5f3f3" />
+                              <ComboBox fx:id="depenses" editable="true" layoutX="99.0" layoutY="202.0" prefHeight="31.0" prefWidth="353.0" promptText="Nom de la depense" />
+                              <Separator layoutX="59.0" layoutY="370.0" prefHeight="0.0" prefWidth="474.0" />
+                              <TextField fx:id="montant_depense" layoutX="98.0" layoutY="313.0" prefHeight="31.0" prefWidth="389.0" promptText="Entrer le montant de la depense" />
+                              <Button layoutX="380.0" layoutY="395.0" mnemonicParsing="false" onAction="#saveDepense" prefHeight="40.0" prefWidth="110.0" style="-fx-background-color: #66aaee;" text="Enregistrer" textFill="#f5f3f3" />
                               <DatePicker fx:id="dpkdep" layoutX="336.0" layoutY="52.0" />
-                              <TextField fx:id="libelle_dep" layoutX="98.0" layoutY="246.0" prefHeight="31.0" prefWidth="389.0" promptText="Libelle" />
+                              <TextField fx:id="libelle_dep" layoutX="98.0" layoutY="260.0" prefHeight="31.0" prefWidth="389.0" promptText="Libelle" />
                               <Accordion layoutX="122.0" layoutY="397.0" nodeOrientation="RIGHT_TO_LEFT" />
-                              <Button layoutX="458.0" layoutY="188.0" mnemonicParsing="false" onAction="#changeToNewDepense" prefHeight="31.0" prefWidth="29.0" style="-fx-background-color: #66aaee;" text="+" textFill="#f5f3f3" />
+                              <Button layoutX="458.0" layoutY="202.0" mnemonicParsing="false" onAction="#changeToNewDepense" prefHeight="31.0" prefWidth="29.0" style="-fx-background-color: #66aaee;" text="+" textFill="#f5f3f3" />
+                              <ComboBox fx:id="vehicule_cbx" disable="true" editable="true" layoutX="288.0" layoutY="144.0" prefHeight="31.0" prefWidth="195.0" promptText="Vehicule" />
+                              <CheckBox fx:id="chkbx_depense_car" layoutX="100.0" layoutY="111.0" mnemonicParsing="false" text="Depense pour un vehicule ?" />
                            </children></AnchorPane>
                   </content>
                 </Tab>

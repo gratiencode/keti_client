@@ -134,7 +134,7 @@
                               <Cursor fx:constant="HAND" />
                            </cursor>
                         </ImageView>
-                        <ImageView fx:id="performance" fitHeight="40.0" fitWidth="40.0" layoutX="12.0" layoutY="615.0" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="performance" fitHeight="40.0" fitWidth="40.0" layoutX="12.0" layoutY="615.0" onMouseClicked="#switchToPerformance" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../icons/speedometer.png" />
                            </image>

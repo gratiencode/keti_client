@@ -23,7 +23,7 @@
       <Pane layoutY="4.0" prefHeight="599.0" prefWidth="1406.0" style="-fx-background-color: white; -fx-background-radius: 12;">
          <children>
             <Pagination fx:id="pagination" layoutX="466.0" layoutY="87.0" maxPageIndicatorCount="3" prefHeight="459.0" prefWidth="928.0" />
-            <TableView fx:id="tbl_retrait" layoutX="471.0" layoutY="97.0" prefHeight="371.0" prefWidth="914.0" tableMenuButtonVisible="true">
+            <TableView fx:id="tbl_retrait" layoutX="471.0" layoutY="97.0" onMouseClicked="#pickElementFromTable" prefHeight="371.0" prefWidth="914.0" tableMenuButtonVisible="true">
                <columns>
                   <TableColumn fx:id="col_dateret" prefWidth="145.0" text="Date" />
                   <TableColumn fx:id="col_client" minWidth="3.0" prefWidth="208.0" text="Clients" />
@@ -50,7 +50,7 @@
             <Button layoutX="312.0" layoutY="484.0" mnemonicParsing="false" onAction="#save" prefHeight="40.0" prefWidth="130.0" style="-fx-background-color: #66aaee;" text="Enregistrer" textFill="#fcfcfc" />
             <Pane layoutX="1289.0" layoutY="28.0" prefHeight="49.0" prefWidth="49.0" style="-fx-border-color: #66aaee; -fx-background-radius: 12; -fx-background-color: #ffffff;">
                <children>
-                  <ImageView fitHeight="31.0" fitWidth="29.0" layoutX="13.0" layoutY="9.0" nodeOrientation="INHERIT" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitHeight="31.0" fitWidth="29.0" layoutX="13.0" layoutY="9.0" nodeOrientation="INHERIT" onMouseClicked="#delete" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../icons/delete32.png" />
                      </image>
@@ -63,24 +63,9 @@
                   <DropShadow />
                </effect>
             </Pane>
-            <Pane layoutX="1220.0" layoutY="28.0" prefHeight="49.0" prefWidth="49.0" style="-fx-border-color: #66aaee; -fx-background-radius: 12; -fx-background-color: #ffffff;">
+            <Pane layoutX="1231.0" layoutY="29.0" prefHeight="49.0" prefWidth="49.0" style="-fx-border-color: #66aaee; -fx-background-radius: 12; -fx-background-color: #ffffff;">
                <children>
-                  <ImageView fitHeight="31.0" fitWidth="29.0" layoutX="11.0" layoutY="10.0" nodeOrientation="INHERIT" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../icons/edit32.png" />
-                     </image>
-                     <cursor>
-                        <Cursor fx:constant="HAND" />
-                     </cursor>
-                  </ImageView>
-               </children>
-               <effect>
-                  <DropShadow />
-               </effect>
-            </Pane>
-            <Pane layoutX="1149.0" layoutY="29.0" prefHeight="49.0" prefWidth="49.0" style="-fx-border-color: #66aaee; -fx-background-radius: 12; -fx-background-color: #ffffff;">
-               <children>
-                  <ImageView fitHeight="31.0" fitWidth="29.0" layoutX="11.0" layoutY="12.0" nodeOrientation="INHERIT" onMouseClicked="#refresh" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitHeight="31.0" fitWidth="29.0" layoutX="10.0" layoutY="11.0" nodeOrientation="INHERIT" onMouseClicked="#refresh" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../icons/refresh32.png" />
                      </image>

@@ -35,6 +35,7 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -49,8 +50,10 @@ import javafx.util.StringConverter;
 import model.Comptefin;
 import model.Depense;
 import model.Payer;
+import model.Succursale;
 import model.Tiers;
 import model.Transporter;
+import model.Vehicule;
 import org.dizitart.no2.Nitrite;
 import retrofit2.Response;
 import util.ComboBoxAutoCompletion;
@@ -72,10 +75,13 @@ public class DepenseController implements Initializable, ScreensChangeListener {
     Datastorage<Transporter> transtore;
     Datastorage<Tiers> tiersStorage;
     Datastorage<Comptefin> cFinStore;
+    Datastorage<Vehicule> vehistore;
     Tiers choosenTiers;
     Transporter choosenTrack;
-    private Comptefin compteFinSelected,compteDebitee;
+    Vehicule choosenCar;
+    private Comptefin compteFinSelected, compteDebitee;
     Depense choosenDepense;
+    Succursale sucursale;
     String token;
     KetiAPI keti;
     @FXML
@@ -83,14 +89,19 @@ public class DepenseController implements Initializable, ScreensChangeListener {
     @FXML
     ComboBox<Depense> depenses;
     @FXML
+    ComboBox<Vehicule> vehicule_cbx;
+    @FXML
     ComboBox<Comptefin> dep_comptefin;
     @FXML
     TextField montant_depense;
     @FXML
     DatePicker dpkdvir;
-    @FXML ComboBox<Comptefin> cb_vrmCredit;
-    @FXML ComboBox<Comptefin> cb_vrmDebit;
-    @FXML TextField montant_vire;
+    @FXML
+    ComboBox<Comptefin> cb_vrmCredit;
+    @FXML
+    ComboBox<Comptefin> cb_vrmDebit;
+    @FXML
+    TextField montant_vire;
     @FXML
     TextField libelle_dep;
     @FXML
@@ -104,6 +115,9 @@ public class DepenseController implements Initializable, ScreensChangeListener {
     ComboBox<Comptefin> comptes;
     ObservableList<Comptefin> accounts;
     ObservableList<Depense> depenseList;
+    ObservableList<Vehicule> vehilist;
+    @FXML
+    CheckBox chkbx_depense_car;
     @FXML
     TextField libelle;
     @FXML
@@ -136,6 +150,7 @@ public class DepenseController implements Initializable, ScreensChangeListener {
     @FXML
     Pagination pagination;
     TransactionView trans;
+    boolean isCarDep;
     int rowDataCount = 20;
 
     double somme = 0;
@@ -160,7 +175,6 @@ public class DepenseController implements Initializable, ScreensChangeListener {
         setPattern(dpkdvir);
         configTab();
         cnfRowPPComboBox();
-        
         pagination.setPageFactory(this::createDataPage);
     }
 
@@ -195,12 +209,17 @@ public class DepenseController implements Initializable, ScreensChangeListener {
         });
     }
 
+    public void setSuccursale(Succursale suc) {
+        this.sucursale = suc;
+    }
+
     public void setToken(Nitrite db, String token) {
         depenseStore = new Datastorage<>(db, Depense.class);
         cFinStore = new Datastorage<>(db, Comptefin.class);
         payerStore = new Datastorage<>(db, Payer.class);
         transtore = new Datastorage<>(db, Transporter.class);
         tiersStorage = new Datastorage<>(db, Tiers.class);
+        vehistore = new Datastorage<>(db, Vehicule.class);
         this.token = token;
         keti = KetiHelper.createService(token);
         transps = FXCollections.observableArrayList();
@@ -208,9 +227,11 @@ public class DepenseController implements Initializable, ScreensChangeListener {
         transviews = FXCollections.observableArrayList();
         transps.addAll(transtore.findAll());
         tierss = FXCollections.observableArrayList();
+        vehilist = FXCollections.observableArrayList();
         tierss.addAll(tiersStorage.findAll());
         accounts = FXCollections.observableArrayList();
         accounts.addAll(cFinStore.findAll());
+        vehilist.addAll(vehistore.findAll());
         payers = payerStore.findAll();
         depenseList.addAll(depenseStore.findAll());
         System.out.println("trans " + transps.size());
@@ -221,6 +242,7 @@ public class DepenseController implements Initializable, ScreensChangeListener {
         cb_vrmCredit.itemsProperty().setValue(accounts);
         cb_vrmDebit.itemsProperty().setValue(accounts);
         depenses.itemsProperty().setValue(depenseList);
+        vehicule_cbx.itemsProperty().setValue(vehilist);
         ComboBoxAutoCompletion<Transporter> comboBoxAutoCompletion = new ComboBoxAutoCompletion<>(trackings);
         ComboBoxAutoCompletion<Comptefin> comboBoxAutoCompletion1 = new ComboBoxAutoCompletion<>(comptes);
         ComboBoxAutoCompletion<Tiers> comboBoxAutoCompletion2 = new ComboBoxAutoCompletion<>(clients_names);
@@ -228,6 +250,7 @@ public class DepenseController implements Initializable, ScreensChangeListener {
         new ComboBoxAutoCompletion<>(depenses);
         new ComboBoxAutoCompletion<>(cb_vrmCredit);
         new ComboBoxAutoCompletion<>(cb_vrmDebit);
+        new ComboBoxAutoCompletion<>(vehicule_cbx);
         configCombos();
 
     }
@@ -288,6 +311,21 @@ public class DepenseController implements Initializable, ScreensChangeListener {
                         .filter(t -> (String.valueOf(t.getTracking()))
                         .equalsIgnoreCase(string))
                         .findFirst().orElse(choosenTrack);
+
+            }
+        });
+        vehicule_cbx.setConverter(new StringConverter<Vehicule>() {
+            @Override
+            public String toString(Vehicule object) {
+                return object == null ? null : object.getPlaque();
+            }
+
+            @Override
+            public Vehicule fromString(String string) {
+                return vehilist.stream()
+                        .filter(v -> (String.valueOf(v.getPlaque()))
+                        .equalsIgnoreCase(string))
+                        .findFirst().orElse(choosenCar);
 
             }
         });
@@ -366,14 +404,29 @@ public class DepenseController implements Initializable, ScreensChangeListener {
                         .findFirst().orElse(choosenDepense);
             }
         });
+        chkbx_depense_car.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (newValue) {
+                    isCarDep = true;
+                    vehicule_cbx.setDisable(false);
+                } else {
+                    isCarDep = false;
+                    vehicule_cbx.setDisable(true);
+                }
+            }
+        });
         clients_names.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Tiers> observable, Tiers oldValue, Tiers newValue) -> {
             choosenTiers = newValue;
+        });
+        vehicule_cbx.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Vehicule> observable, Vehicule oldValue, Vehicule newValue) -> {
+            choosenCar = newValue;
         });
         depenses.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Depense>() {
             @Override
             public void changed(ObservableValue<? extends Depense> observable, Depense oldValue, Depense newValue) {
                 choosenDepense = newValue;
-                montant_depense.setText(String.valueOf(choosenDepense.getMontantFixe())); 
+                montant_depense.setText(String.valueOf(choosenDepense.getMontantFixe()));
             }
         });
         trackings.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Transporter>() {
@@ -401,13 +454,13 @@ public class DepenseController implements Initializable, ScreensChangeListener {
             List<Payer> pays = payerStore.findAll();
             fillTable(pays, compteFinSelected);
         });
-         cb_vrmCredit.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Comptefin> observable, Comptefin oldValue, Comptefin newValue) -> {
+        cb_vrmCredit.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Comptefin> observable, Comptefin oldValue, Comptefin newValue) -> {
             compteFinSelected = newValue;
             List<Payer> pays = payerStore.findAll();
             fillTable(pays, compteFinSelected);
         });
-         cb_vrmDebit.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Comptefin> observable, Comptefin oldValue, Comptefin newValue) -> {
-            compteDebitee= newValue;
+        cb_vrmDebit.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Comptefin> observable, Comptefin oldValue, Comptefin newValue) -> {
+            compteDebitee = newValue;
         });
         dep_comptefin.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Comptefin> observable, Comptefin oldValue, Comptefin newValue) -> {
             compteFinSelected = newValue;
@@ -415,20 +468,26 @@ public class DepenseController implements Initializable, ScreensChangeListener {
             fillTable(pays, compteFinSelected);
         });
     }
+
     @FXML
-    public void saveTransfert(ActionEvent evt){
-        if(compteFinSelected==null && compteDebitee==null && montant_vire.getText().isEmpty()){
+    public void saveTransfert(ActionEvent evt) {
+        if (compteFinSelected == null && compteDebitee == null && montant_vire.getText().isEmpty()) {
             return;
         }
-        Payer p=new Payer(DataId.generate());
+        Succursale sucCompte = compteFinSelected.getSucursaleId();
+        if(!sucCompte.equals(sucursale)){
+            MainUI.notify(null, "Erreur", "Impossible de choisir un compte d'un autre succursale", 4, "error");
+           return; 
+        }
+        Payer p = new Payer(DataId.generate());
         p.setCompteIdCredit(compteFinSelected);
         p.setCompteIdDebit(compteDebitee);
         p.setDatePayement(Constants.toUtilDate(dpkdvir.getValue()));
-        p.setLibelle("Virement interne du "+Constants.DateFormateur.format(p.getDatePayement()));
+        p.setLibelle("Virement interne du " + Constants.DateFormateur.format(p.getDatePayement()));
         p.setMontantPaye(Double.parseDouble(montant_vire.getText()));
         p.setReference(0);
         Payer pvir = payerStore.insert(p);
-        if(pvir!=null){
+        if (pvir != null) {
             MainUI.notify(null, "Succès", "Transfert enregistrée avec succès", 4, "info");
         }
     }
@@ -486,6 +545,12 @@ public class DepenseController implements Initializable, ScreensChangeListener {
                     montantIn = 0;
                 }
             }
+        }
+
+        Succursale sucCompte = compteFinSelected.getSucursaleId();
+        if (!sucCompte.equals(sucursale)) {
+            MainUI.notify(null, "Erreur", "Impossible de choisir un compte d'un autre succursale", 4, "error");
+            return;
         }
         Payer p = new Payer(DataId.generate());
         p.setClientId(choosenTiers);
@@ -576,6 +641,7 @@ public class DepenseController implements Initializable, ScreensChangeListener {
 
     @FXML
     private void saveDepense(ActionEvent evt) {
+        String lbl = isCarDep ? libelle_dep.getText() + " pour " + choosenCar.getPlaque() : libelle_dep.getText();
         if (choosenDepense == null) {
             if (montant_depense.getText().isEmpty() && libelle_dep.getText().isEmpty() && design_dep.getText().isEmpty()) {
                 return;
@@ -589,23 +655,33 @@ public class DepenseController implements Initializable, ScreensChangeListener {
             } else {
                 dep = deplike.get(0);
             }
+            Succursale sucCompte = compteFinSelected.getSucursaleId();
+            if (!sucCompte.equals(sucursale)) {
+                MainUI.notify(null, "Erreur", "Impossible de choisir un compte d'un autre succursale", 4, "error");
+                return;
+            }
             depenseStore.insert(dep);
             Payer p = new Payer(DataId.generate());
             p.setCompteIdCredit(compteFinSelected);
             p.setDatePayement(Constants.toUtilDate(dpkdep.getValue()));
             p.setDepenseId(dep);
-            p.setLibelle(libelle_dep.getText());
+            p.setLibelle(lbl);
             p.setMontantPaye(dep.getMontantFixe());
             p.setReference(0);
             payerStore.insert(p);
         } else {
+            Succursale sucCompte = compteFinSelected.getSucursaleId();
+            if (!sucCompte.equals(sucursale)) {
+                MainUI.notify(null, "Erreur", "Impossible de choisir un compte d'un autre succursale", 4, "error");
+                return;
+            }
             choosenDepense.setMontantFixe(Double.parseDouble(montant_depense.getText()));
             Depense dep = depenseStore.update("uid", choosenDepense.getUid(), choosenDepense);
             Payer p = new Payer(DataId.generate());
             p.setCompteIdCredit(compteFinSelected);
             p.setDatePayement(Constants.toUtilDate(dpkdep.getValue()));
             p.setDepenseId(dep);
-            p.setLibelle(libelle_dep.getText());
+            p.setLibelle(lbl);
             p.setMontantPaye(dep.getMontantFixe());
             p.setReference(0);
             payerStore.insert(p);
@@ -614,57 +690,56 @@ public class DepenseController implements Initializable, ScreensChangeListener {
         depenses.setVisible(true);
         design_dep.setVisible(false);
         choosenDepense = null;
-        
+
     }
-    
+
     @FXML
-    private void refresh(Event evt){
+    private void refresh(Event evt) {
         refresh();
     }
-    
-    public void search(String query){
-       List<TransactionView> trv=new ArrayList<>();
-        System.err.println("Transview "+transviews.size());
-       for(TransactionView tv:transviews){
-           if((tv.getLibelle()+" "+Constants.DateFormateur.format(tv.getDate())).toUpperCase()
-                   .contains(query.toUpperCase())){
-               trv.add(tv);
-           }
-       }
-       tbl_transaction.getItems().clear();
-       tbl_transaction.getItems().addAll(trv);
-       Platform.runLater(new Runnable() {
+
+    public void search(String query) {
+        List<TransactionView> trv = new ArrayList<>();
+        System.err.println("Transview " + transviews.size());
+        for (TransactionView tv : transviews) {
+            if ((tv.getLibelle() + " " + Constants.DateFormateur.format(tv.getDate())).toUpperCase()
+                    .contains(query.toUpperCase())) {
+                trv.add(tv);
+            }
+        }
+        tbl_transaction.getItems().clear();
+        tbl_transaction.getItems().addAll(trv);
+        Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                count.setText(trv.size()+" Elements");
+                count.setText(trv.size() + " Elements");
             }
         });
     }
-    
+
     @FXML
-    private void delete(Event evt){
-      if(trans==null){
-          return;
-      }
-       payerStore.delete("uid", trans.getPayerUid());
-        System.out.println("Pauid "+trans.getPayerUid());
-       tbl_transaction.getItems().remove(trans);
+    private void delete(Event evt) {
+        if (trans == null) {
+            return;
+        }
+        payerStore.delete("uid", trans.getPayerUid());
+        System.out.println("Pauid " + trans.getPayerUid());
+        tbl_transaction.getItems().remove(trans);
         try {
-          Response<Void> del = keti.deletePayer(trans.getPayerUid()).execute();
-            System.out.println("Delete payer "+del.message());
-          if(del.isSuccessful()){
-             MainUI.notify(null, "Succès", "Depense supprimée avec succès", 4, "info"); 
-          }   
+            Response<Void> del = keti.deletePayer(trans.getPayerUid()).execute();
+            System.out.println("Delete payer " + del.message());
+            if (del.isSuccessful()) {
+                MainUI.notify(null, "Succès", "Depense supprimée avec succès", 4, "info");
+            }
         } catch (IOException ex) {
             Logger.getLogger(DepenseController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     @FXML
-    private void pickTrans(Event evt){
-       trans = tbl_transaction.getSelectionModel().getSelectedItem();
+    private void pickTrans(Event evt) {
+        trans = tbl_transaction.getSelectionModel().getSelectedItem();
     }
-    
 
     @FXML
     private void onHoverHome(MouseEvent event) {

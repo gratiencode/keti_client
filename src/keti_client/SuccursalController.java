@@ -222,7 +222,7 @@ public class SuccursalController implements Initializable, ScreensChangeListener
                             }
                         }
                     });
-            MainUI.notify(notify_ok, "Succes", "Enregistrement de succursale reussi", 5);
+            MainUI.notify(notify_ok, "Succes", "Enregistrement de succursale reussi", 5,"Info");
 
         }
 
@@ -253,7 +253,7 @@ public class SuccursalController implements Initializable, ScreensChangeListener
         s.setDirecteur(directeur_succ.getText());
         Succursale i = bd.update("uid", s.getUid(), s);
         if (i != null) {
-            MainUI.notify(notify_ok, "Success", "Succursale modifier avec succes", 3);
+            MainUI.notify(notify_ok, "Success", "Succursale modifier avec succes", 3,"info");
             datanize();
             keti.updateSuccursale(s.getUid(), s).enqueue(new Callback<Succursale>() {
                 @Override
@@ -269,26 +269,7 @@ public class SuccursalController implements Initializable, ScreensChangeListener
     }
 
     private void sync() {
-        keti.getSucursales().enqueue(new Callback<List<Succursale>>() {
-            @Override
-            public void onResponse(Call<List<Succursale>> call, Response<List<Succursale>> rspns) {
-                if (rspns.isSuccessful()) {
-                    List<Succursale> sucs = rspns.body();
-                    for (Succursale s : sucs) {
-                        if (bd.findById(s.getUid()) == null) {
-                            bd.insert(s);
-                        }
-                    }
-                    datanize();
-                }
-                //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public void onFailure(Call<List<Succursale>> call, Throwable thrwbl) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-        });
+        
     }
 
     @FXML
@@ -313,12 +294,13 @@ public class SuccursalController implements Initializable, ScreensChangeListener
                 bd.delete("uid", s.getUid());
             });
             tbl_succs.getItems().removeAll(selectedItems);
-            MainUI.notify(notify_ok, "Succes", "Succursale suprimer avec succes", 4);
+            MainUI.notify(notify_ok, "Succes", "Succursale suprimer avec succes", 4,"info");
             keti.removeSucursals(selectedItems).enqueue(new Callback<List<Succursale>>() {
                 @Override
                 public void onResponse(Call<List<Succursale>> call, Response<List<Succursale>> rspns) {
+                    System.err.println("Delete sucursale "+rspns.message());
                     if (rspns.isSuccessful()) {
-                        System.out.println("Suppression reuusi");
+                        System.err.println("Suppression reuusi");
                     }
                 }
 

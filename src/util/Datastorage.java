@@ -5,23 +5,21 @@
  */
 package util;
 
-import com.sun.javafx.PlatformUtil;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import keti_client.KetiGateController;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.event.ChangeListener;
 import org.dizitart.no2.objects.Cursor;
 import org.dizitart.no2.objects.ObjectRepository;
+import org.dizitart.no2.objects.filters.ObjectFilters;
+import static org.dizitart.no2.objects.filters.ObjectFilters.and;
+import static org.dizitart.no2.objects.filters.ObjectFilters.elemMatch;
 import static org.dizitart.no2.objects.filters.ObjectFilters.eq;
+import static org.dizitart.no2.objects.filters.ObjectFilters.gte;
+import static org.dizitart.no2.objects.filters.ObjectFilters.lte;
 import static org.dizitart.no2.objects.filters.ObjectFilters.text;
 
 /**
@@ -94,9 +92,41 @@ public class Datastorage<T> {
         Cursor<T> find = repository.find(eq(key, value));
         return find.toList();
     }
+    /**
+     * This function must be used with chargement only
+     * @param value
+     * @return 
+     */
+    public List<T> findTracking(int value) {
+        Cursor<T> find = repository.find(eq("tracking", value));
+        return find.toList();
+    }
+    /**
+     * this function is to be use only and only if object is an instance of payer as well as function findPayerCrediteur
+     * @param value
+     * @return 
+     */
+    public List<T> findPayerDebiteur(String value){
+        Cursor<T> find = repository.find(eq("compteIdDebit", value));
+        return find.toList();
+    }
+     /**
+     * this function is to be use only and only if object is an instance of payer as well as function findPayerDebiteur
+     * @param value
+     * @return 
+     */
+    public List<T> findPayerCrediteur(String value){
+        Cursor<T> find = repository.find(eq("compteIdCredit", value));
+        return find.toList();
+    }
+    
+    public List<T> findBetween(String key, long value1, long value2) {
+        Cursor<T> find = repository.find(elemMatch(key, and(gte(key, value1),lte(key, value2))));
+        return find.toList();
+    }
 
     public List<T> findAllLike(String key, String value) {
-        Cursor<T> find = repository.find(text(key, value));
+        Cursor<T> find = repository.find(text(key, value+"*"));
         return find.toList();
     }
 
