@@ -14,6 +14,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableColumn;
@@ -22,6 +23,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import model.Credentials;
 import model.Succursale;
@@ -90,7 +92,7 @@ public class KetiGateController implements Initializable, ScreensChangeListener 
 
     public KetiGateController() {
         keti = KetiHelper.createService(null);
-        pref = Preferences.userNodeForPackage(this.getClass());
+        pref = Preferences.userNodeForPackage(Keti_client.class);
     }
 
     private double xOffset = 0;
@@ -116,8 +118,9 @@ public class KetiGateController implements Initializable, ScreensChangeListener 
                     controler.setScreen(Constants.MAIN);
                     pref.put("uname", cred.getUsername());
                     pref.put("pswd", cred.getPassword()); 
+                    
                     Platform.runLater(() -> {
-                        MainUI.replaceView(this.getClass(), "mainui.fxml", 790, 1550, cred.getUsername(), token, lr);
+                        MainUI.replaceView(this.getClass(), "mainui.fxml", MainUI.preferedHeight(), MainUI.preferedWidth(), cred.getUsername(), token, lr);
                         Keti_client.stagex.close();
                     });
 

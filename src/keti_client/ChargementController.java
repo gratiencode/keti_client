@@ -279,6 +279,7 @@ public class ChargementController implements Initializable, ScreensChangeListene
         List<TransporterView> result = new ArrayList<>();
         for (TransporterView tr : tierset) {
             Tiers t = tr.getTransporter().getIdTiers();
+            if(t==null)continue;
             if (t.getUid().equalsIgnoreCase(idtier)) {
                 if (!result.contains(tr)) {
                     sommeDue += tr.getTransporter().getPriceToPay();
@@ -321,6 +322,7 @@ public class ChargementController implements Initializable, ScreensChangeListene
         double keti_sum = 0;
         List<Tiers> ltr = pickTiers();
         for (Tiers t : ltr) {
+            if(t==null)continue;
             KeyValueTrio<Double, List<TransporterView>, Double> data = findByClient(tableContent, t.getUid());
             List<TransporterView> m4clt = data.getValue();
             double sum2Pay = data.getKey();
@@ -469,7 +471,6 @@ public class ChargementController implements Initializable, ScreensChangeListene
         transdb = new Datastorage<>(this.localDatabase, Transporter.class);
         voyagedb = new Datastorage<>(this.localDatabase, Voyage.class);
         msedb = new Datastorage<>(this.localDatabase, Marchandise.class);
-
         refresh(null);
     }
 
@@ -516,9 +517,11 @@ public class ChargementController implements Initializable, ScreensChangeListene
             Transporter t = tv.getTransporter();
             Voyage v = tv.getVoyage();
             Marchandise m = tv.getMarchandise();
+            Tiers tr=t.getIdTiers();
+            if(tr==null)continue;
             if ((t.getObservation() + " " + Constants.DateFormateur.format(t.getDateTransport()) + ""
-                    + " " + t.getIdVehicule().getPlaque() + " " + t.getIdTiers().getNom() + " " + t.getIdTiers().getPrenom()
-                    + " " + t.getIdTiers().getAdresse() + " " + t.getIdTiers().getTypetiers()
+                    + " " + t.getIdVehicule().getPlaque() + " " + tr.getNom() + " " + tr.getPrenom()
+                    + " " + tr.getAdresse() + " " + tr.getTypetiers()
                     + "" + t.getIdVehicule().getMarque() + " " + t.getPriceToPay() + " " + t.getTracking() + ""
                     + " " + v.getEtat() + " " + v.getSuccursalleId().getNomSuccursale() + " "
                     + "" + m.getDescription() + " " + m.getNomMarchandise()).toUpperCase().contains(query.toUpperCase())) {

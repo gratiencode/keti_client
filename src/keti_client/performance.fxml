@@ -16,12 +16,12 @@
 
 <AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="keti_client.PerformanceController">
    <children>
-      <Pane layoutX="5.0" layoutY="6.0" prefHeight="604.0" prefWidth="1440.0" style="-fx-background-color: white; -fx-background-radius: 12;">
+      <Pane layoutX="5.0" layoutY="6.0" prefHeight="532.0" prefWidth="1238.0" style="-fx-background-color: white; -fx-background-radius: 12;">
          <effect>
             <DropShadow />
          </effect>
          <children>
-            <Pane layoutX="1353.0" layoutY="29.0" prefHeight="42.0" prefWidth="49.0" style="-fx-border-color: #66aaee; -fx-background-radius: 12; -fx-background-color: #ffffff;">
+            <Pane layoutX="1174.0" layoutY="29.0" prefHeight="42.0" prefWidth="49.0" style="-fx-border-color: #66aaee; -fx-background-radius: 12; -fx-background-color: #ffffff;">
                <children>
                   <ImageView fitHeight="31.0" fitWidth="29.0" layoutX="10.0" layoutY="9.0" nodeOrientation="INHERIT" onMouseClicked="#refresh" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -36,12 +36,12 @@
                   <DropShadow />
                </effect>
             </Pane>
-            <Pagination fx:id="pagination" layoutX="27.0" layoutY="78.0" maxPageIndicatorCount="5" prefHeight="501.0" prefWidth="1393.0" />
-            <ComboBox fx:id="rowPP" layoutX="541.0" layoutY="537.0" onAction="#selectRowPerPage" prefHeight="24.0" prefWidth="87.0" visibleRowCount="5" />
-            <Label layoutX="418.0" layoutY="540.0" text="Ligne par page : " />
-            <DatePicker fx:id="dpk_debut" layoutX="538.0" layoutY="45.0" onAction="#pickDateAction" promptText="Date du début" />
-            <DatePicker fx:id="dpk_fin" layoutX="764.0" layoutY="45.0" onAction="#pickDateAction" promptText="Date limite" />
-            <Label contentDisplay="CENTER" layoutX="745.0" layoutY="46.0" prefHeight="21.0" prefWidth="5.0" style="-fx-background-color: white;" text="à">
+            <Pagination fx:id="pagination" layoutX="11.0" layoutY="83.0" maxPageIndicatorCount="5" prefHeight="441.0" prefWidth="1217.0" />
+            <ComboBox fx:id="rowPP" layoutX="147.0" layoutY="481.0" onAction="#selectRowPerPage" prefHeight="24.0" prefWidth="87.0" visibleRowCount="5" />
+            <Label layoutX="24.0" layoutY="484.0" text="Ligne par page : " />
+            <DatePicker fx:id="dpk_debut" layoutX="442.0" layoutY="45.0" onAction="#pickDateAction" promptText="Date du début" />
+            <DatePicker fx:id="dpk_fin" layoutX="668.0" layoutY="45.0" onAction="#pickDateAction" promptText="Date limite" />
+            <Label contentDisplay="CENTER" layoutX="649.0" layoutY="46.0" prefHeight="21.0" prefWidth="5.0" style="-fx-background-color: white;" text="à">
                <font>
                   <Font size="18.0" />
                </font>
@@ -51,7 +51,7 @@
                   <Font name="Arial Black" size="26.0" />
                </font>
             </Label>
-            <TreeTableView fx:id="tbl_perfomance" layoutX="35.0" layoutY="88.0" prefHeight="423.0" prefWidth="1375.0" tableMenuButtonVisible="true">
+            <TreeTableView fx:id="tbl_perfomance" layoutX="12.0" layoutY="88.0" prefHeight="366.0" prefWidth="1206.0" tableMenuButtonVisible="true">
               <columns>
                 <TreeTableColumn fx:id="colmois" prefWidth="75.0" text="Periode" />
                 <TreeTableColumn fx:id="colvehicule" prefWidth="75.0" text="Vehicule" />
@@ -66,19 +66,19 @@
                   <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                </columnResizePolicy>
             </TreeTableView>
-            <Label fx:id="entree" layoutX="822.0" layoutY="535.0" prefHeight="28.0" prefWidth="171.0" style="-fx-background-color: white;" text="Entrees : ........" textOverrun="CLIP">
+            <Label fx:id="entree" layoutX="732.0" layoutY="484.0" prefHeight="28.0" prefWidth="140.0" style="-fx-background-color: white;" text="Entrees : ........" textOverrun="CLIP">
                <font>
-                  <Font name="Arial" size="16.0" />
+                  <Font name="Arial" size="14.0" />
                </font>
             </Label>
-            <Label fx:id="result" layoutX="1207.0" layoutY="537.0" prefHeight="28.0" prefWidth="197.0" style="-fx-background-color: white;" text="Resultat : ....." textOverrun="CLIP">
+            <Label fx:id="result" layoutX="1050.0" layoutY="486.0" prefHeight="28.0" prefWidth="146.0" style="-fx-background-color: white;" text="Resultat : ....." textOverrun="CLIP">
                <font>
-                  <Font name="Arial" size="16.0" />
+                  <Font name="Arial" size="14.0" />
                </font>
             </Label>
-            <Label fx:id="sortie" layoutX="1013.0" layoutY="537.0" prefHeight="28.0" prefWidth="171.0" style="-fx-background-color: white;" text="Sorties : ....." textOverrun="CLIP">
+            <Label fx:id="sortie" layoutX="889.0" layoutY="485.0" prefHeight="28.0" prefWidth="140.0" style="-fx-background-color: white;" text="Sorties : ....." textOverrun="CLIP">
                <font>
-                  <Font name="Arial" size="16.0" />
+                  <Font name="Arial" size="14.0" />
                </font>
             </Label>
          </children>

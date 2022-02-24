@@ -61,7 +61,7 @@ public class UtilisateurController implements Initializable {
     @FXML
     TextField nom;
     @FXML
-    TextField prenom,username;
+    TextField prenom, username;
     @FXML
     PasswordField pswd, pswd1;
     Datastorage<Succursale> datarsale;
@@ -76,12 +76,14 @@ public class UtilisateurController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         configCombos();
+        
     }
 
     public void setToken(String token) {
         this.token = token;
         keti = KetiHelper.createService(token);
     }
+    ObservableList<User> users;
 
     public void setDatabase(Nitrite db) {
         this.datarsale = new Datastorage<>(db, Succursale.class);
@@ -91,8 +93,41 @@ public class UtilisateurController implements Initializable {
         cbx_Sucursale.setItems(suclist);
         ObservableList<Role> roles = FXCollections.observableArrayList(Role.Comptable, Role.Directeur, Role.Associe, Role.Caissier, Role.Administrator);
         cbx_Role.setItems(roles);
-        ObservableList<User> users = FXCollections.observableArrayList(dataser.findAll());
+        users = FXCollections.observableArrayList(dataser.findAll());
         listUser.setItems(users);
+        activate.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (!newValue) {
+                    if (user != null) {
+                        user.setActif(false);
+                        keti.updateUser(user.getUid(), user)
+                                .enqueue(new Callback<User>() {
+                                    @Override
+                                    public void onResponse(Call<User> call, Response<User> rspns) {
+                                        System.err.println("Resposne update user " + rspns.message());
+                                        Platform.runLater(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                MainUI.notify(null, "Succès", "Utilisateur modifié avec succès", 4, "info");
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<User> call, Throwable thrwbl) {
+                                        Platform.runLater(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                MainUI.notify(null, "Erreur", "Erreur : [\n" + thrwbl.getMessage() + "\n]", 16, "error");
+                                            }
+                                        });
+                                    }
+                                });
+                    }
+                }
+            }
+        });
     }
 
     @FXML
@@ -120,49 +155,31 @@ public class UtilisateurController implements Initializable {
         keti.createUser(user).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> rspns) {
-                System.err.println(" User creation response "+rspns.message());
-                if(rspns.isSuccessful()){
+                System.err.println(" User creation response " + rspns.message());
+                if (rspns.isSuccessful()) {
+                    User u = rspns.body();
+                    users.add(u);
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                           MainUI.notify(null, "Succès", "Utilisateur créé avec succès", 4, "info"); 
+                            MainUI.notify(null, "Succès", "Utilisateur créé avec succès", 4, "info");
                         }
                     });
-                   
+
                 }
             }
 
             @Override
             public void onFailure(Call<User> call, Throwable thrwbl) {
-                MainUI.notify(null, "Erreur", "Erreur : [\n"+thrwbl.getMessage()+"\n]", 16, "error");
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        MainUI.notify(null, "Erreur", "Erreur : [\n" + thrwbl.getMessage() + "\n]", 16, "error");
+                    }
+                });
             }
         });
-        
-    }
-    
-    @FXML
-    public void suspend(Event evt){
-        activate.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-               if(!newValue){
-                   if(user!=null){
-                       keti.updateUser(user.getUid(), user)
-                               .enqueue(new Callback<User>() {
-                           @Override
-                           public void onResponse(Call<User> call, Response<User> rspns) {
-                               MainUI.notify(null, "Succès", "Utilisateur modifié avec succès", 4, "info");
-                           }
 
-                           @Override
-                           public void onFailure(Call<User> call, Throwable thrwbl) {
-                                MainUI.notify(null, "Erreur", "Erreur : [\n"+thrwbl.getMessage()+"\n]", 16, "error");
-                           }
-                       });
-                   }
-               }
-            }
-        });
     }
 
     @FXML
@@ -222,7 +239,12 @@ public class UtilisateurController implements Initializable {
                 if (empty || item == null) {
                     setText(null);
                 } else {
-                    setText(item.getNom() + " " + item.getPrenom() + " Role : " + item.getRole());
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            setText(item.getNom() + " " + item.getPrenom() + " Role : " + item.getRole());
+                        }
+                    });
                 }
             }
 
@@ -233,15 +255,16 @@ public class UtilisateurController implements Initializable {
         cbx_Role.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Role> observable, Role oldValue, Role newValue) -> {
             role = newValue;
         });
-        
+
         listUser.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends User> observable, User oldValue, User newValue) -> {
-            user=newValue;
+            user = newValue;
             nom.setText(user.getNom());
             prenom.setText(user.getPrenom());
+            username.setText(user.getUsername());
             activate.setSelected(user.getActif());
             cbx_Role.getSelectionModel().select(Role.valueOf(user.getRole()));
-            sucursale=datarsale.findById(user.getIdSucursale().getUid());
-            cbx_Sucursale.getSelectionModel().select(sucursale);         
+            sucursale = datarsale.findById(user.getIdSucursale().getUid());
+            cbx_Sucursale.getSelectionModel().select(sucursale);
         });
     }
 }

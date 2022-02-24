@@ -14,11 +14,11 @@
 
 <AnchorPane id="AnchorPane" fx:id="ppalPane" prefHeight="531.0" prefWidth="1112.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="keti_client.KetiGateController">
     <children>
-      <StackPane prefHeight="563.0" prefWidth="1112.0" style="-fx-background-color: white;">
+      <StackPane prefHeight="565.0" prefWidth="1112.0" style="-fx-background-color: white;">
          <children>
-            <Pane prefHeight="563.0" prefWidth="1107.0" style="-fx-background-color: white;">
+            <Pane prefHeight="530.0" prefWidth="1112.0" style="-fx-background-color: white;">
                <children>
-                  <ImageView fitHeight="567.0" fitWidth="653.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitHeight="471.0" fitWidth="610.0" layoutX="43.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../icons/truck_name.jpg" />
                      </image>
@@ -42,7 +42,7 @@
                         <Image url="@../icons/Cancel_32px.png" />
                      </image>
                   </ImageView>
-                  <ImageView fitHeight="110.0" fitWidth="126.0" layoutX="528.0" layoutY="452.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitHeight="157.0" fitWidth="175.0" layoutX="251.0" layoutY="402.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../icons/LOGO%20OK%20KETI%20.png" />
                      </image>

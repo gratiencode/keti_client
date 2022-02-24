@@ -96,7 +96,7 @@ public class SuccursalController implements Initializable, ScreensChangeListener
     @FXML
     Label count;
 
-    List<Succursale> suclist;
+    ObservableList<Succursale> suclist;
 
     int rowsDataCount = 20;
 
@@ -120,7 +120,7 @@ public class SuccursalController implements Initializable, ScreensChangeListener
         tbl_succs.getColumns().clear();
         tbl_succs.getColumns().addAll(nomSuccursale, adresse, directeur);
         tbl_succs.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
+        suclist=FXCollections.observableArrayList();
         suc_pagination.setPageFactory(this::createDataPage);
         ObservableList<Integer> rows = FXCollections.observableArrayList(Arrays.asList(20, 25, 50, 100, 250, 500, 1000));
         rowsPP.setItems(rows);
@@ -140,18 +140,21 @@ public class SuccursalController implements Initializable, ScreensChangeListener
 
     public void setLocalDatabase(Nitrite localDatabase) {
         bd = new Datastorage<>(localDatabase, Succursale.class);
-        suclist = bd.findAll();
+        suclist.addAll(bd.findAll()) ;
         System.err.println("Sucurlist " + suclist.size());
-        for (Succursale s : suclist) {
-            tbl_succs.getItems().add(s);
-        }
+        tbl_succs.setItems(suclist);
+         Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                count.setText(suclist.size() + " Succursales");
+            }
+        });
         bd.registerListener((ChangeInfo ci) -> {
             if (ci.getChangeType() == ChangeType.UPDATE) {
                 Collection<ChangedItem> changedItems = ci.getChangedItems();
                 System.out.println("Changes " + changedItems.size());
             }
-        });
-        sync();
+        }); 
     }
 
     public void filter(String query) {
@@ -161,8 +164,8 @@ public class SuccursalController implements Initializable, ScreensChangeListener
                 result.add(s);
             }
         }
-        tbl_succs.getItems().clear();
-        tbl_succs.getItems().addAll(result);
+//        tbl_succs.getItems().clear();
+        tbl_succs.setItems(FXCollections.observableArrayList(result));
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -178,12 +181,9 @@ public class SuccursalController implements Initializable, ScreensChangeListener
     }
 
     public void datanize() {
-        suclist = bd.findAll();
+        suclist.setAll(bd.findAll());
         System.err.println("Sucurlist " + suclist.size());
-        tbl_succs.getItems().clear();
-        for (Succursale s : suclist) {
-            tbl_succs.getItems().add(s);
-        }
+       tbl_succs.setItems(suclist);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {

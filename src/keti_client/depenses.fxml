@@ -23,10 +23,10 @@
 
 <AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="keti_client.DepenseController">
    <children>
-      <Pane layoutX="1.0" layoutY="1.0" prefHeight="599.0" prefWidth="1406.0" style="-fx-background-color: white; -fx-background-radius: 12;">
+      <Pane layoutX="-6.0" layoutY="1.0" prefHeight="539.0" prefWidth="1305.0" style="-fx-background-color: white; -fx-background-radius: 12;">
          <children>
-            <Pagination fx:id="pagination" layoutX="652.0" layoutY="86.0" maxPageIndicatorCount="3" prefHeight="498.0" prefWidth="714.0" />
-            <TableView fx:id="tbl_transaction" layoutX="660.0" layoutY="96.0" onMouseClicked="#pickTrans" prefHeight="424.0" prefWidth="722.0" tableMenuButtonVisible="true">
+            <Pagination fx:id="pagination" layoutX="609.0" layoutY="86.0" maxPageIndicatorCount="3" prefHeight="447.0" prefWidth="679.0" />
+            <TableView fx:id="tbl_transaction" layoutX="617.0" layoutY="96.0" onMouseClicked="#pickTrans" prefHeight="362.0" prefWidth="662.0" tableMenuButtonVisible="true">
                <columns>
                   <TableColumn fx:id="datecol" prefWidth="145.0" text="Date" />
                   <TableColumn fx:id="libellecol" minWidth="3.0" prefWidth="208.0" text="LIBELLES" />
@@ -43,8 +43,8 @@
                   <Font size="20.0" />
                </font>
             </Label>
-            <Separator layoutX="634.0" layoutY="18.0" orientation="VERTICAL" prefHeight="563.0" prefWidth="7.0" />
-            <Pane layoutX="1289.0" layoutY="28.0" prefHeight="49.0" prefWidth="49.0" style="-fx-border-color: #66aaee; -fx-background-radius: 12; -fx-background-color: #ffffff;">
+            <Separator layoutX="602.0" layoutY="18.0" orientation="VERTICAL" prefHeight="508.0" prefWidth="6.0" />
+            <Pane layoutX="1238.0" layoutY="28.0" prefHeight="49.0" prefWidth="49.0" style="-fx-border-color: #66aaee; -fx-background-radius: 12; -fx-background-color: #ffffff;">
                <children>
                   <ImageView fitHeight="31.0" fitWidth="29.0" layoutX="13.0" layoutY="9.0" nodeOrientation="INHERIT" onMouseClicked="#delete" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -59,7 +59,7 @@
                   <DropShadow />
                </effect>
             </Pane>
-            <Pane layoutX="1227.0" layoutY="29.0" prefHeight="49.0" prefWidth="49.0" style="-fx-border-color: #66aaee; -fx-background-radius: 12; -fx-background-color: #ffffff;">
+            <Pane layoutX="1176.0" layoutY="29.0" prefHeight="49.0" prefWidth="49.0" style="-fx-border-color: #66aaee; -fx-background-radius: 12; -fx-background-color: #ffffff;">
                <children>
                   <ImageView fitHeight="31.0" fitWidth="29.0" layoutX="11.0" layoutY="12.0" nodeOrientation="INHERIT" onMouseClicked="#refresh" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -74,8 +74,8 @@
                   <DropShadow />
                </effect>
             </Pane>
-            <ComboBox fx:id="rowPP" layoutX="854.0" layoutY="542.0" onAction="#selectRowPerPage" prefHeight="24.0" prefWidth="87.0" visibleRowCount="5" />
-            <Label layoutX="731.0" layoutY="546.0" text="Ligne par page : " />
+            <ComboBox fx:id="rowPP" layoutX="781.0" layoutY="491.0" onAction="#selectRowPerPage" prefHeight="24.0" prefWidth="87.0" visibleRowCount="5" />
+            <Label layoutX="658.0" layoutY="495.0" text="Ligne par page : " />
             <Label fx:id="count" layoutX="667.0" layoutY="35.0" text="0 elements">
                <font>
                   <Font name="Arial Black" size="21.0" />
@@ -86,54 +86,54 @@
                   <Image url="@../icons/Presences_32px.png" />
                </image>
             </ImageView>
-            <TabPane layoutX="14.0" layoutY="68.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="498.0" prefWidth="598.0" side="LEFT" style="-fx-background-color: white;" tabClosingPolicy="UNAVAILABLE">
+            <TabPane layoutX="14.0" layoutY="68.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="456.0" prefWidth="579.0" side="LEFT" style="-fx-background-color: white;" tabClosingPolicy="UNAVAILABLE">
               <tabs>
                 <Tab text="Paiements">
                   <content>
-                        <Pane>
+                        <Pane prefHeight="456.0" prefWidth="543.0">
                            <children>
-                          <AnchorPane layoutX="-4.0" layoutY="-1.0" minHeight="0.0" minWidth="0.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="498.0" prefWidth="571.0" style="-fx-background-color: white;">
+                          <AnchorPane layoutX="-4.0" layoutY="-1.0" minHeight="0.0" minWidth="0.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="457.0" prefWidth="552.0" style="-fx-background-color: white;">
                                  <children>
-                                    <Label layoutX="23.0" layoutY="29.0" text="Informations de la transaction" />
-                                    <ComboBox fx:id="comptes" editable="true" layoutX="294.0" layoutY="100.0" prefHeight="31.0" prefWidth="246.0" promptText="Comptes" />
-                                    <TextField fx:id="libelle" layoutX="38.0" layoutY="195.0" prefHeight="31.0" prefWidth="502.0" promptText="Libelle">
+                                    <Label layoutX="23.0" layoutY="12.0" text="Informations de la transaction" />
+                                    <ComboBox fx:id="comptes" editable="true" layoutX="294.0" layoutY="83.0" prefHeight="31.0" prefWidth="246.0" promptText="Comptes" />
+                                    <TextField fx:id="libelle" layoutX="38.0" layoutY="178.0" prefHeight="31.0" prefWidth="502.0" promptText="Libelle">
                                        <cursor>
                                           <Cursor fx:constant="TEXT" />
                                        </cursor>
                                     </TextField>
-                                    <TextField fx:id="montantRecu" layoutX="38.0" layoutY="307.0" onKeyTyped="#calculateSum" prefHeight="30.0" prefWidth="504.0" promptText="Entrer le montant nominal réçu">
+                                    <TextField fx:id="montantRecu" layoutX="38.0" layoutY="290.0" onKeyTyped="#calculateSum" prefHeight="30.0" prefWidth="504.0" promptText="Entrer le montant nominal réçu">
                                        <cursor>
                                           <Cursor fx:constant="TEXT" />
                                        </cursor>
                                     </TextField>
-                                    <DatePicker fx:id="dpk" layoutX="293.0" layoutY="145.0" prefHeight="31.0" prefWidth="247.0" promptText="Date operation" />
-                                    <ComboBox fx:id="clients_names" editable="true" layoutX="39.0" layoutY="145.0" prefHeight="31.0" prefWidth="242.0" promptText="Clients" />
-                                    <Button layoutX="384.0" layoutY="424.0" mnemonicParsing="false" onAction="#save" prefHeight="40.0" prefWidth="130.0" style="-fx-background-color: #66aaee;" text="Enregistrer" textFill="#fcfcfc" />
+                                    <DatePicker fx:id="dpk" layoutX="293.0" layoutY="128.0" prefHeight="31.0" prefWidth="247.0" promptText="Date operation" />
+                                    <ComboBox fx:id="clients_names" editable="true" layoutX="39.0" layoutY="128.0" prefHeight="31.0" prefWidth="242.0" promptText="Clients" />
+                                    <Button layoutX="384.0" layoutY="389.0" mnemonicParsing="false" onAction="#save" prefHeight="40.0" prefWidth="130.0" style="-fx-background-color: #66aaee;" text="Enregistrer" textFill="#fcfcfc" />
                                     <Label fx:id="identifiant" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="293.0" layoutY="54.0" prefHeight="26.0" prefWidth="245.0">
                                        <font>
                                           <Font size="22.0" />
                                        </font>
                                     </Label>
-                                    <Separator layoutX="137.0" layoutY="280.0" prefHeight="12.0" prefWidth="403.0" />
-                                    <Separator layoutX="222.0" layoutY="33.0" prefHeight="12.0" prefWidth="319.0" />
-                                    <Label fx:id="totalApayer" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="39.0" layoutY="245.0" prefHeight="26.0" prefWidth="501.0" text="Total à payer : $ 0.00">
+                                    <Separator layoutX="137.0" layoutY="263.0" prefHeight="12.0" prefWidth="403.0" />
+                                    <Separator layoutX="222.0" layoutY="16.0" prefHeight="12.0" prefWidth="319.0" />
+                                    <Label fx:id="totalApayer" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="39.0" layoutY="228.0" prefHeight="26.0" prefWidth="501.0" text="Total à payer : $ 0.00">
                                        <font>
                                           <Font size="22.0" />
                                        </font>
                                     </Label>
-                                    <Label fx:id="aremborser" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="154.0" layoutY="355.0" prefHeight="26.0" prefWidth="382.0" text="Total à rembourser : $ 0.00">
+                                    <Label fx:id="aremborser" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="154.0" layoutY="338.0" prefHeight="26.0" prefWidth="382.0" text="Total à rembourser : $ 0.00">
                                        <font>
                                           <Font name="System Bold" size="14.0" />
                                        </font>
                                     </Label>
-                                    <Separator layoutX="38.0" layoutY="388.0" prefHeight="12.0" prefWidth="503.0" />
-                                    <Label layoutX="37.0" layoutY="276.0" text="Montant réçu" />
-                                    <Label contentDisplay="RIGHT" layoutX="28.0" layoutY="54.0" prefHeight="26.0" prefWidth="245.0" text="Encaissements">
+                                    <Separator layoutX="38.0" layoutY="371.0" prefHeight="12.0" prefWidth="503.0" />
+                                    <Label layoutX="37.0" layoutY="259.0" text="Montant réçu" />
+                                    <Label contentDisplay="RIGHT" layoutX="28.0" layoutY="37.0" prefHeight="26.0" prefWidth="245.0" text="Encaissements">
                                        <font>
                                           <Font size="22.0" />
                                        </font>
                                     </Label>
-                                    <ComboBox fx:id="trackings" editable="true" layoutX="38.0" layoutY="100.0" prefHeight="31.0" prefWidth="245.0" promptText="tracking" />
+                                    <ComboBox fx:id="trackings" editable="true" layoutX="38.0" layoutY="83.0" prefHeight="31.0" prefWidth="245.0" promptText="tracking" />
                                  </children>
                               </AnchorPane>
                            </children>

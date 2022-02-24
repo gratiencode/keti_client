@@ -5,12 +5,18 @@
  */
 package keti_client;
 
+import com.sun.javafx.PlatformUtil;
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.dizitart.no2.Nitrite;
 import util.Constants;
 
 /**
@@ -25,13 +31,43 @@ public class Keti_client extends Application {
     private double xOffset = 0;
     private double yOffset = 0;
 
-   
+    public static Nitrite initDatabase() {
+        String path, fpath;
+        if (PlatformUtil.isWindows()) {
+            path = "C:\\Keti\\datastore";
+            fpath = path + "\\nitrikdb.db";
+        } else {
+            path = "/home/" + System.getProperty("user.name") + "/Keti/datastore";
+            fpath = path + "/nitrikdb.db";
+        }
+        File folder = new File(path);
+        File file = null;
+        boolean dir = folder.exists();
+        if (!dir) {
+            dir = folder.mkdir();
+        }
+        System.out.println("Droit Folder " + dir);
+        if (dir) {
+            file = new File(path+"/nitrikdb.db");
+            // System.out.println("Droit "+file.canWrite());
+            if (!file.exists()) {
+                try {
+                    file.createNewFile();
+                } catch (IOException ex) {
+                    Logger.getLogger(KetiGateController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return Nitrite.builder()
+                .filePath(fpath)
+                .compressed()
+                .openOrCreate();
+    }
 
     @Override
     public void start(Stage stage) throws Exception {
         UIController uiController = new UIController();
         uiController.loadScreen(Constants.LOGIN, Constants.LOGIN_SCREEN);
-        uiController.loadScreen(Constants.MAIN, Constants.MAIN_SCREEN);
         uiController.loadScreen(Constants.CAISSES, Constants.CAISSE_VIEW);
         uiController.loadScreen(Constants.CHARGEMENT, Constants.CHARGEMENT_VIEW);
         uiController.loadScreen(Constants.PERFORMANCE, Constants.PERFORMANCE_VIEW);
@@ -44,13 +80,12 @@ public class Keti_client extends Application {
 
         AnchorPane root = new AnchorPane();
         root.getChildren().addAll(uiController);
-        Scene scene = new Scene(root);
+        Scene scene = new Scene(root,1112,565);
         stagex = stage;
         rootx = root;
         stage.setScene(scene);
-        stage.setMaximized(true);
         stage.initStyle(StageStyle.UNDECORATED);
-
+       
         root.setOnMousePressed((javafx.scene.input.MouseEvent event) -> {
             xOffset = event.getSceneX();
             yOffset = event.getSceneY();
@@ -60,8 +95,9 @@ public class Keti_client extends Application {
             stage.setX(event.getScreenX() - xOffset);
             stage.setY(event.getScreenY() - yOffset);
         });
-        stage.show();
 
+        stage.show();
+        stage.centerOnScreen();
     }
 
     /**

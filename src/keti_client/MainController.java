@@ -72,8 +72,8 @@ public class MainController implements Initializable, ScreensChangeListener {
     String username;
     private LoginResult longinResult;
 
-    Nitrite db;
-    NitriteBuilder nb;
+     Nitrite db;
+ 
 
     @FXML
     private TextField searchField;
@@ -121,6 +121,7 @@ public class MainController implements Initializable, ScreensChangeListener {
     private static MainController instance;
 
     public MainController() {
+        pref = Preferences.userNodeForPackage(Keti_client.class);
         instance = this;
     }
 
@@ -162,8 +163,11 @@ public class MainController implements Initializable, ScreensChangeListener {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         installTooltips();
-        initDb();
-
+db=Keti_client.initDatabase();
+     
+ transdb = new Datastorage<>(db, Transporter.class);
+        tiers = new Datastorage<>(db, Tiers.class);
+        dpenses = new Datastorage(db, Payer.class);
     }
 
     @Override
@@ -171,45 +175,44 @@ public class MainController implements Initializable, ScreensChangeListener {
         this.controler = cont;
     }
 
-    private void initDb() {
-        if (PlatformUtil.isWindows()) {
-            db = Nitrite.builder()
-                    .filePath("C:\\Keti\\datastore\\nitrikdb.db")
-                    .compressed()
-                    .openOrCreate("admin", "Admin*22");
-        } else {
-            //" + System.getProperty("user.name") + "
-            File folder = new File("/home/" + System.getProperty("user.name") + "/Keti/datastore");
-            File file = null;
-            boolean dir = folder.exists();
-
-            if (!dir) {
-                dir = folder.mkdir();
-            }
-            System.out.println("Droit Folder " + dir);
-            if (dir) {
-                file = new File("/home/" + System.getProperty("user.name") + "/Keti/datastore/nitrikdb.db");
-                // System.out.println("Droit "+file.canWrite());
-                if (!file.exists()) {
-                    try {
-                        file.createNewFile();
-                    } catch (IOException ex) {
-                        Logger.getLogger(KetiGateController.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
-
-            nb = Nitrite.builder()
-                    .compressed()
-                    .filePath(file);
-            db = nb.openOrCreate();
-
-        }
-        transdb = new Datastorage<>(db, Transporter.class);
-        tiers = new Datastorage<>(db, Tiers.class);
-        dpenses = new Datastorage(db, Payer.class);
-
-    }
+//    public static Nitrite initDb() {
+//        if (PlatformUtil.isWindows()) {
+//            db = Nitrite.builder()
+//                    .filePath("C:\\Keti\\datastore\\nitrikdb.db")
+//                    .compressed()
+//                    .openOrCreate("admin", "Admin*22");
+//        } else {
+//            //" + System.getProperty("user.name") + "
+//            File folder = new File("/home/" + System.getProperty("user.name") + "/Keti/datastore");
+//            File file = null;
+//            boolean dir = folder.exists();
+//
+//            if (!dir) {
+//                dir = folder.mkdir();
+//            }
+//            System.out.println("Droit Folder " + dir);
+//            if (dir) {
+//                file = new File("/home/" + System.getProperty("user.name") + "/Keti/datastore/nitrikdb.db");
+//                // System.out.println("Droit "+file.canWrite());
+//                if (!file.exists()) {
+//                    try {
+//                        file.createNewFile();
+//                    } catch (IOException ex) {
+//                        Logger.getLogger(KetiGateController.class.getName()).log(Level.SEVERE, null, ex);
+//                    }
+//                }
+//            }
+//
+//            nb = Nitrite.builder()
+//                    .compressed()
+//                    .filePath(file);
+//            db = nb.openOrCreate();
+//
+//        }
+//        return db;
+//       
+//
+//    }
 
     private void installTooltips() {
         Tooltip thome = new Tooltip();
@@ -287,6 +290,7 @@ public class MainController implements Initializable, ScreensChangeListener {
         KetiHelper.setOnTokenRefreshCallback((Token var1) -> {
             this.token = var1.getToken();
             pref.put("KetiToken", token);
+            System.err.println("Refresh token "+token);
         });
         SyncEngine se = new SyncEngine(KETI, db);
         se.start();
@@ -386,6 +390,7 @@ public class MainController implements Initializable, ScreensChangeListener {
         piepane.setLegendVisible(false);
 
         for (Tiers v : lv) {
+            if(v==null)continue;
             long sume = clientCount(ltr, v);
             PieChart.Data data = new PieChart.Data(v.getNom().charAt(0) + ". " + v.getPrenom(), sume);
             if (!existPie(piepane.getData(), data.getName())) {
@@ -417,6 +422,8 @@ public class MainController implements Initializable, ScreensChangeListener {
         long count = 0;
         for (Transporter tr : ltr) {
             Tiers trs = tr.getIdTiers();
+            if(trs==null)continue;
+            if(t==null)continue;
             if (trs.getUid().equals(t.getUid())) {
                 count++;
             }

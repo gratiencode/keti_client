@@ -36,6 +36,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Paint;
 import javafx.util.StringConverter;
+import model.Comptefin;
 import model.Depense;
 import model.Payer;
 import model.Succursale;
@@ -64,10 +65,14 @@ public class PerformanceController implements Initializable, ScreensChangeListen
     Datastorage<Transporter> datatrans;
     Datastorage<Vehicule> datavehicule;
     Datastorage<Succursale> datarsale;
-    @FXML Label count;
-    @FXML Label entree;
-    @FXML Label sortie;
-    @FXML Label result;
+    @FXML
+    Label count;
+    @FXML
+    Label entree;
+    @FXML
+    Label sortie;
+    @FXML
+    Label result;
     @FXML
     DatePicker dpk_debut;
     @FXML
@@ -219,45 +224,46 @@ public class PerformanceController implements Initializable, ScreensChangeListen
                 treeItems.add(parent);
             }
         }
-        
+
         rootView.getChildren().setAll(treeItems);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-               count.setText(rootView.getChildren().size()+" éléments");
-                  entree.setText("Entree : "+entreeTotal());
-                  sortie.setText("Sortie : "+sortieTotal());
-                  double rs=entreeTotal()-sortieTotal();
-                  if(rs<=0){
-                     result.setTextFill(Paint.valueOf("#ff6666"));
-                  }else{
-                     result.setTextFill(Paint.valueOf("#444444")); 
-                  }
-                  result.setText("Resultat : "+rs);
+                count.setText(rootView.getChildren().size() + " éléments");
+                entree.setText("Entree : " + entreeTotal());
+                sortie.setText("Sortie : " + sortieTotal());
+                double rs = entreeTotal() - sortieTotal();
+                if (rs <= 0) {
+                    result.setTextFill(Paint.valueOf("#ff6666"));
+                } else {
+                    result.setTextFill(Paint.valueOf("#444444"));
+                }
+                result.setText("Resultat : " + rs);
             }
         });
     }
-    
-    double entreeTotal(){
-       ObservableList<TreeItem<Performance>> ls=rootView.getChildren();
-       double somme=0;
-       for(TreeItem<Performance> tp:ls){
-           Performance p=tp.getValue();
-           somme+=p.getRecette();
-       }
-       return somme;
+
+    double entreeTotal() {
+        ObservableList<TreeItem<Performance>> ls = rootView.getChildren();
+        double somme = 0;
+        for (TreeItem<Performance> tp : ls) {
+            Performance p = tp.getValue();
+            somme += p.getRecette();
+        }
+        return somme;
     }
-    double sortieTotal(){
-       ObservableList<TreeItem<Performance>> ls=rootView.getChildren();
-       double somme=0;
-       double sum=0;
-       for(TreeItem<Performance> tp:ls){
-           Performance p=tp.getValue();
-           somme+=p.getDepense();
-           sum+=p.getReductionPerte();
-       }
-       somme=somme+sum;
-       return somme;
+
+    double sortieTotal() {
+        ObservableList<TreeItem<Performance>> ls = rootView.getChildren();
+        double somme = 0;
+        double sum = 0;
+        for (TreeItem<Performance> tp : ls) {
+            Performance p = tp.getValue();
+            somme += p.getDepense();
+            sum += p.getReductionPerte();
+        }
+        somme = somme + sum;
+        return somme;
     }
 
     double calculateRecette(List<Transporter> listransp, Vehicule v, long date1, long date2) {
@@ -298,27 +304,30 @@ public class PerformanceController implements Initializable, ScreensChangeListen
         }
         return somme;
     }
-    
-    
 
     private double sumDepenseByVehiculeBySuccursale(List<Payer> lt, String idSuc, String plaque, long date1, long date2) {
         double somme = 0;
         for (Payer t : lt) {
             Depense d = t.getDepenseId();
+            Comptefin cpf = t.getCompteIdCredit();
+            if (cpf == null) {
+                continue;
+            }
+            Succursale x = cpf.getSucursaleId();
             if (d != null) {
-                Succursale x = t.getCompteIdCredit().getSucursaleId();
                 String libelle = t.getLibelle();
                 if (date1 != 0 && date2 != 0) {
                     long date = t.getDatePayement().getTime();
                     if (libelle.toUpperCase().contains(plaque.toUpperCase())
                             && (date >= date1 && date <= date2) && x.getUid().equals(idSuc)) {
                         somme += t.getMontantPaye();
+                        System.err.println("Log here OK ");
                     }
                 } else {
                     System.err.println("ICI");
                     if (libelle.toUpperCase().contains(plaque.toUpperCase())
                             && x.getUid().equals(idSuc)) {
-                        System.err.println("Log here OK");
+                        System.err.println("Log here OK ");
                         somme += t.getMontantPaye();
                     }
                 }
@@ -383,36 +392,35 @@ public class PerformanceController implements Initializable, ScreensChangeListen
     public void refresh() {
         populate(datavehicule.findAll(), datatrans.findAll(), datadepense.findAll(), datarsale.findAll(), 0, 0);
     }
-    
-    @FXML public void refresh(Event evt){
+
+    @FXML
+    public void refresh(Event evt) {
         refresh();
     }
-    
-    
 
     @FXML
     public void selectRowPerPage(ActionEvent e) {
 
     }
 
-    public void search(String query){
-        ObservableList<TreeItem<Performance>> result=FXCollections.observableArrayList();
-            for(TreeItem<Performance> tp:treeItems){
-                Performance p=tp.getValue();
-                Vehicule v=p.getVehicule();
-                Succursale s=p.getSuccursale();
-                if((v.getPlaque()+" "+v.getModeleVehicule()+""
-                        + " "+s.getNomSuccursale()+" "+s.getAdresse()).toUpperCase().contains(query.toUpperCase())){
-                    result.add(tp);
-                }
-                
+    public void search(String query) {
+        ObservableList<TreeItem<Performance>> result = FXCollections.observableArrayList();
+        for (TreeItem<Performance> tp : treeItems) {
+            Performance p = tp.getValue();
+            Vehicule v = p.getVehicule();
+            Succursale s = p.getSuccursale();
+            if ((v.getPlaque() + " " + v.getModeleVehicule() + ""
+                    + " " + s.getNomSuccursale() + " " + s.getAdresse()).toUpperCase().contains(query.toUpperCase())) {
+                result.add(tp);
             }
-            rootView.getChildren().setAll(result);
+
+        }
+        rootView.getChildren().setAll(result);
     }
-    
+
     @FXML
     public void pickDateAction(ActionEvent evt) {
-         LocalDate d = dpk_debut.getValue();
+        LocalDate d = dpk_debut.getValue();
         LocalDate f = dpk_fin.getValue();
         if (d != null && f != null) {
             long deb = Constants.dateInMillis(d);

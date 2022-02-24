@@ -327,7 +327,7 @@ public class SyncEngine {
                     }
                 }
             }
-        }, 1, 10, TimeUnit.SECONDS);
+        }, 1, 60, TimeUnit.SECONDS);
     }
 
     public void syncUp() {
@@ -552,7 +552,7 @@ public class SyncEngine {
                     }
                 }
             }
-        }, 1, 5, TimeUnit.SECONDS);
+        }, 1, 64, TimeUnit.SECONDS);
     }
 
     public void start() {

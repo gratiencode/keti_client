@@ -15,9 +15,9 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="628.0" prefWidth="1464.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="keti_client.ChargementController">
+<AnchorPane id="AnchorPane" prefHeight="586.0" prefWidth="1306.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="keti_client.ChargementController">
    <children>
-      <Pane layoutX="13.0" layoutY="10.0" prefHeight="604.0" prefWidth="1440.0" style="-fx-background-color: white; -fx-background-radius: 12;">
+      <Pane layoutX="6.0" layoutY="4.0" prefHeight="548.0" prefWidth="1287.0" style="-fx-background-color: white; -fx-background-radius: 12;">
          <effect>
             <DropShadow />
          </effect>
@@ -30,7 +30,7 @@
                   <Cursor fx:constant="HAND" />
                </cursor>
             </Button>
-            <Pane layoutX="1300.0" layoutY="40.0" prefHeight="42.0" prefWidth="49.0" style="-fx-border-color: #66aaee; -fx-background-radius: 12; -fx-background-color: #ffffff;">
+            <Pane layoutX="1199.0" layoutY="40.0" prefHeight="42.0" prefWidth="49.0" style="-fx-border-color: #66aaee; -fx-background-radius: 12; -fx-background-color: #ffffff;">
                <children>
                   <ImageView fitHeight="31.0" fitWidth="29.0" layoutX="13.0" layoutY="6.0" nodeOrientation="INHERIT" onMouseClicked="#deleteTransporter" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -45,7 +45,7 @@
                   <DropShadow />
                </effect>
             </Pane>
-            <Pane layoutX="1237.0" layoutY="39.0" prefHeight="42.0" prefWidth="49.0" style="-fx-border-color: #66aaee; -fx-background-radius: 12; -fx-background-color: #ffffff;">
+            <Pane layoutX="1136.0" layoutY="39.0" prefHeight="42.0" prefWidth="49.0" style="-fx-border-color: #66aaee; -fx-background-radius: 12; -fx-background-color: #ffffff;">
                <children>
                   <ImageView fitHeight="31.0" fitWidth="29.0" layoutX="10.0" layoutY="9.0" nodeOrientation="INHERIT" onMouseClicked="#refreshTransporter" onMouseEntered="#onHoverHome" onMouseExited="#onOutHome" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -60,8 +60,8 @@
                   <DropShadow />
                </effect>
             </Pane>
-            <Pagination fx:id="pagination" layoutX="27.0" layoutY="120.0" maxPageIndicatorCount="5" prefHeight="459.0" prefWidth="1393.0" />
-            <TreeTableView fx:id="tbl_tranporterViews" layoutX="28.0" layoutY="123.0" prefHeight="390.0" prefWidth="1393.0" tableMenuButtonVisible="true">
+            <Pagination fx:id="pagination" layoutX="18.0" layoutY="120.0" maxPageIndicatorCount="5" prefHeight="415.0" prefWidth="1258.0" />
+            <TreeTableView fx:id="tbl_tranporterViews" layoutX="24.0" layoutY="123.0" prefHeight="350.0" prefWidth="1246.0" tableMenuButtonVisible="true">
               <columns>
                 <TreeTableColumn fx:id="tricoldate" prefWidth="129.0" text="Date" />
                   <TreeTableColumn fx:id="tricolplaque_model" prefWidth="95.0" text="Plaque &amp; Model" />
@@ -79,11 +79,11 @@
                   <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                </columnResizePolicy>
             </TreeTableView>
-            <ComboBox fx:id="rowPP" layoutX="541.0" layoutY="537.0" onAction="#selectRowPerPage" prefHeight="24.0" prefWidth="87.0" visibleRowCount="5" />
-            <Label layoutX="418.0" layoutY="540.0" text="Ligne par page : " />
-            <Label fx:id="total_global" layoutX="1039.0" layoutY="535.0" prefHeight="28.0" prefWidth="382.0" style="-fx-background-color: white;" text="Tot gen : $10000000000000" textOverrun="CLIP">
+            <ComboBox fx:id="rowPP" layoutX="163.0" layoutY="499.0" onAction="#selectRowPerPage" prefHeight="24.0" prefWidth="87.0" visibleRowCount="5" />
+            <Label layoutX="40.0" layoutY="502.0" text="Ligne par page : " />
+            <Label fx:id="total_global" layoutX="975.0" layoutY="492.0" prefHeight="28.0" prefWidth="250.0" style="-fx-background-color: white;" text="Tot gen : $10000000000000" textOverrun="CLIP">
                <font>
-                  <Font name="Arial Black" size="19.0" />
+                  <Font name="Arial Black" size="16.0" />
                </font>
             </Label>
             <DatePicker fx:id="dpk_debut" layoutX="538.0" layoutY="80.0" onAction="#pickDateAction" promptText="Date du début" />

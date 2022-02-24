@@ -228,22 +228,22 @@ public class VehiculeController implements Initializable, ScreensChangeListener 
         v.setTypeVehicule(vt);
         Vehicule insert = vehiculesdb.insert(v);
         if (insert != null) {
-            MainUI.notify(notify, "Succès", "Véhicule créé avec succès", 3);
+            MainUI.notify(null, "Succès", "Véhicule créé avec succès", 3,"info");
             tblVeh.getItems().add(insert);
             //here come API creation
-            keti.createVehicule(v).enqueue(new Callback<Vehicule>() {
-                @Override
-                public void onResponse(Call<Vehicule> call, Response<Vehicule> rspns) {
-                    if (rspns.isSuccessful()) {
-                        System.out.println(" created succesfuly ");
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Vehicule> call, Throwable thrwbl) {
-                    System.err.println("Erreur " + thrwbl.getMessage());
-                }
-            });
+//            keti.createVehicule(v).enqueue(new Callback<Vehicule>() {
+//                @Override
+//                public void onResponse(Call<Vehicule> call, Response<Vehicule> rspns) {
+//                    if (rspns.isSuccessful()) {
+//                        System.out.println(" created succesfuly ");
+//                    }
+//                }
+//
+//                @Override
+//                public void onFailure(Call<Vehicule> call, Throwable thrwbl) {
+//                    System.err.println("Erreur " + thrwbl.getMessage());
+//                }
+//            });
         }
     }
 

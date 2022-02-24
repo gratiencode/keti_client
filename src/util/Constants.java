@@ -6,7 +6,10 @@
 package util;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
@@ -37,7 +40,7 @@ public class Constants {
     public static final String RETRAIT = "retrait-ui";
     public static final String VEHICULES = "vehicules-ui";
     public static final String CAISSES = "finance-ui";
-    public static final SimpleDateFormat DateFormateur=new SimpleDateFormat("yyyy-MM-dd");
+    public static final SimpleDateFormat DateFormateur=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     public static final Calendar Calendrier=Calendar.getInstance();
     
     //dialogs
@@ -50,8 +53,10 @@ public class Constants {
     public static final String VEHICLE_DEPARTURE="Départ";
     public static final String VEHICLE_ARRIVAL="Arrivée";
     
-    public static Date toUtilDate(LocalDate ldt){
-        return Date.from(ldt.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    public static Date toUtilDate(LocalDate ld){
+        LocalDateTime ldt=ld.atTime(LocalTime.of(LocalTime.now().getHour(), LocalTime.now().getMinute(), LocalTime.now().getSecond()));
+        Instant i=ldt.atZone(ZoneId.systemDefault()).toInstant();
+        return Date.from(i);
     }
     
     public static long dateInMillis(LocalDate ldt){

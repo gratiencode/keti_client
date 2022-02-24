@@ -116,7 +116,7 @@ public class TransporterController implements Initializable {
                         .stream()
                         .filter(clt -> (clt.getPrenom() + " " + clt.getNom() + " " + clt.getAdresse())
                         .equalsIgnoreCase(string))
-                        .findFirst().orElse(null);
+                        .findFirst().orElse(choosenTier);
             }
         });
         vehicules_names.setConverter(new StringConverter<Vehicule>() {
